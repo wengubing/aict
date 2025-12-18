@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple TV+ 内容库 | 筛选与浏览</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <!-- 自定义Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        apple: {
+                            blue: '#0071E3',
+                            gray: '#F5F5F7',
+                            dark: '#1D1D1F'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['SF Pro Display', 'Helvetica Neue', 'Arial', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-apple-gray min-h-screen font-sans">
+    <!-- 头部导航 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <i class="fab fa-apple text-3xl text-apple-dark mr-3"></i>
+                <h1 class="text-2xl font-bold text-apple-dark">Apple TV+ 内容库</h1>
+            </div>
+            <p class="text-gray-600">精选原创内容 · 支持多维度筛选</p>
+        </div>
+    </header>
+
+    <!-- 筛选与排序区 -->
+    <section class="container mx-auto px-4 py-6">
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- 年份筛选 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">筛选年份</label>
+                    <select id="yearFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue">
+                        <option value="all">全部年份</option>
+                        <!-- 年份选项由JS动态生成 -->
+                    </select>
+                </div>
+                <!-- 类型筛选 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">筛选类型</label>
+                    <select id="typeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue">
+                        <option value="all">全部类型</option>
+                        <option value="剧集">剧集</option>
+                        <option value="电影">电影</option>
+                        <option value="纪录片">纪录片</option>
+                        <option value="动画">动画</option>
+                        <option value="特别节目">特别节目</option>
+                    </select>
+                </div>
+                <!-- 评分筛选 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">最低评分</label>
+                    <select id="ratingFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue">
+                        <option value="0">不限评分</option>
+                        <option value="7">7分及以上</option>
+                        <option value="8">8分及以上</option>
+                        <option value="9">9分及以上</option>
+                    </select>
+                </div>
+                <!-- 排序方式 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">排序方式</label>
+                    <select id="sortBy" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue">
+                        <option value="date_asc">时间正序（旧→新）</option>
+                        <option value="date_desc" selected>时间倒序（新→旧）</option>
+                        <option value="title_asc">标题正序（A→Z）</option>
+                        <option value="rating_desc">评分倒序（高→低）</option>
+                    </select>
+                </div>
+            </div>
+            <!-- 搜索框 -->
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="搜索片名（原名/中文名）" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- 内容展示区 -->
+    <section class="container mx-auto px-4 pb-12">
+        <div id="contentGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- 内容由JS动态渲染 -->
+        </div>
+        <!-- 空状态提示 -->
+        <div id="emptyState" class="hidden text-center py-12">
+            <i class="fas fa-film text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg">未找到匹配的内容，请调整筛选条件</p>
+        </div>
+    </section>
+
+    <script>
+        // 1. 数据源：Apple TV+内容库数据（补充2025年内容+匹配图片）
+        const appleTVContent = [
+            // 2019年
+            {
+                id: 1,
+                date: "2019-11-01",
+                title_en: "The Morning Show",
+                title_cn: "早间新闻",
+                type: "剧集",
+                rating: 8.2,
+                desc: "詹妮弗·安妮斯顿、瑞茜·威瑟斯彭主演的职场剧，揭露电视新闻业的权力斗争与人性挣扎。",
+                img: "https://picsum.photos/id/1010/500/750" // 职场相关图片
+            },
+            {
+                id: 2,
+                date: "2019-11-01",
+                title_en: "See",
+                title_cn: "看见",
+                type: "剧集",
+                rating: 7.5,
+                desc: "设定在未来世界，人类失去视力，杰森·莫玛饰演的部落领袖保护人类仅存的视力后代。",
+                img: "https://picsum.photos/id/1039/500/750" // 科幻部落相关图片
+            },
+            {
+                id: 3,
+                date: "2019-11-01",
+                title_en: "Wolfwalkers",
+                title_cn: "狼行者",
+                type: "动画",
+                rating: 9.1,
+                desc: "卡通沙龙工作室作品，手绘动画美学巅峰，讲述爱尔兰女孩与狼女的奇幻友谊。",
+                img: "https://picsum.photos/id/1025/500/750" // 狼/自然相关图片
+            },
+            {
+                id: 11,
+                date: "2019-12-06",
+                title_en: "Truth Be Told",
+                title_cn: "真相捕捉",
+                type: "剧集",
+                rating: 7.3,
+                desc: "聚焦真实犯罪案件的调查，探讨媒体与真相的边界。",
+                img: "https://picsum.photos/id/1071/500/750" // 调查相关图片
+            },
+            // 2020年
+            {
+                id: 4,
+                date: "2020-07-10",
+                title_en: "Greyhound",
+                title_cn: "灰猎犬号",
+                type: "电影",
+                rating: 7.8,
+                desc: "汤姆·汉克斯主演的二战潜艇猎杀战，紧张刺激的海上追逐战。",
+                img: "https://picsum.photos/id/1041/500/750" // 海洋/战舰相关图片
+            },
+            {
+                id: 12,
+                date: "2020-04-24",
+                title_en: "Beastie Boys Story",
+                title_cn: "野兽男孩的故事",
+                type: "纪录片",
+                rating: 8.1,
+                desc: "记录野兽男孩乐队的成长与发展，展现嘻哈文化的变迁。",
+                img: "https://picsum.photos/id/1082/500/750" // 音乐相关图片
+            },
+            // 2021年
+            {
+                id: 5,
+                date: "2021-04-16",
+                title_en: "Ted Lasso",
+                title_cn: "足球教练",
+                type: "剧集",
+                rating: 9.2,
+                desc: "艾美奖11项大奖，美式足球教练执教英超球队的爆笑温情故事。",
+                img: "https://picsum.photos/id/1068/500/750" // 足球相关图片
+            },
+            // 2022年
+            {
+                id: 6,
+                date: "2022-02-18",
+                title_en: "Severance",
+                title_cn: "人生切割术",
+                type: "剧集",
+                rating: 9.3,
+                desc: "脑洞大开的职场科幻，讲述上班族大脑被手术分离工作记忆与生活记忆的故事。",
+                img: "https://picsum.photos/id/1074/500/750" // 科幻职场相关图片
+            },
+            {
+                id: 7,
+                date: "2022-07-08",
+                title_en: "Black Bird",
+                title_cn: "黑鸟",
+                type: "剧集",
+                rating: 8.5,
+                desc: "塔伦·埃哲顿主演，改编自真实事件的监狱惊悚，与连环杀手建立信任的危险游戏。",
+                img: "https://picsum.photos/id/1059/500/750" // 监狱/惊悚相关图片
+            },
+            // 2023年
+            {
+                id: 8,
+                date: "2023-05-05",
+                title_en: "Silo",
+                title_cn: "末日地堡",
+                type: "剧集",
+                rating: 8.0,
+                desc: "改编自休·豪伊的科幻小说，讲述人类生活在地下巨型地堡中的生存故事。",
+                img: "https://picsum.photos/id/1033/500/750" // 地堡/末日相关图片
+            },
+            {
+                id: 9,
+                date: "2023-10-20",
+                title_en: "Killers of the Flower Moon",
+                title_cn: "花月杀手",
+                type: "电影",
+                rating: 8.3,
+                desc: "马丁·斯科塞斯执导，莱昂纳多·迪卡普里奥主演，讲述奥塞奇族印第安人谋杀案。",
+                img: "https://picsum.photos/id/1043/500/750" // 西部/悬疑相关图片
+            },
+            // 2024年
+            {
+                id: 10,
+                date: "2024-05-16",
+                title_en: "Murderbot",
+                title_cn: "杀手机器人",
+                type: "剧集",
+                rating: 8.7,
+                desc: "改编自玛莎·威尔斯的获奖小说，讲述厌恶人类却保护人类的杀手机器人的故事。",
+                img: "https://picsum.photos/id/1072/500/750" // 机器人/科幻相关图片
+            },
+            // 2025年（补充内容）
+            {
+                id: 13,
+                date: "2025-03-26",
+                title_en: "The Studio",
+                title_cn: "工作室",
+                type: "剧集",
+                rating: 8.4,
+                desc: "聚焦好莱坞顶级电影工作室的幕后故事，展现影视行业的名利与挣扎。",
+                img: "https://picsum.photos/id/1083/500/750" // 影视工作室相关图片
+            },
+            {
+                id: 14,
+                date: "2025-05-30",
+                title_en: "Bono: Stories of Surrender",
+                title_cn: "波诺：投降的故事",
+                type: "纪录片",
+                rating: 8.9,
+                desc: "U2乐队主唱波诺的自传式纪录片，讲述其音乐生涯与个人成长。",
+                img: "https://picsum.photos/id/1081/500/750" // 音乐人物相关图片
+            },
+            {
+                id: 15,
+                date: "2025-11-26",
+                title_en: "Prehistoric Planet: Ice Age",
+                title_cn: "史前星球：冰河时代",
+                type: "纪录片",
+                rating: 9.2,
+                desc: "《史前星球》续作，揭秘冰河时代的史前生物生存状态，画面震撼。",
+                img: "https://picsum.photos/id/1047/500/750" // 冰河时代/史前生物相关图片
+            },
+            {
+                id: 16,
+                date: "2025-09-24",
+                title_en: "Slow Horses Season 4",
+                title_cn: "流人第四季",
+                type: "剧集",
+                rating: 9.1,
+                desc: "加里·奥德曼主演的英国谍战喜剧，MI5废物组的全新反间谍任务。",
+                img: "https://picsum.photos/id/1062/500/750" // 谍战相关图片
+            },
+            {
+                id: 17,
+                date: "2025-12-05",
+                title_en: "The First Snow of Fraggle Rock",
+                title_cn: "弗拉格摇滚的第一场雪",
+                type: "特别节目",
+                rating: 8.5,
+                desc: "经典布偶剧弗拉格摇滚的圣诞特别篇，充满温馨与奇幻的节日故事。",
+                img: "https://picsum.photos/id/1019/500/750" // 圣诞/奇幻相关图片
+            }
+        ];
+
+        // 2. 初始化页面：生成年份选项、渲染内容
+        document.addEventListener('DOMContentLoaded', function() {
+            initYearFilter();
+            renderContent(appleTVContent);
+            bindEvents();
+        });
+
+        // 3. 生成年份筛选的选项（从数据中提取唯一年份）
+        function initYearFilter() {
+            const yearFilter = document.getElementById('yearFilter');
+            // 提取所有年份并去重，按升序排列
+            const years = [...new Set(appleTVContent.map(item => new Date(item.date).getFullYear()))].sort((a, b) => a - b);
+            // 添加年份选项
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearFilter.appendChild(option);
+            });
+        }
+
+        // 4. 绑定筛选、排序、搜索事件
+        function bindEvents() {
+            // 筛选和排序事件
+            const filters = ['yearFilter', 'typeFilter', 'ratingFilter', 'sortBy', 'searchInput'];
+            filters.forEach(id => {
+                document.getElementById(id).addEventListener('change' , updateContent);
+                document.getElementById(id).addEventListener('input' , updateContent); // 搜索框实时输入
+            });
+        }
+
+        // 5. 根据筛选条件更新内容
+        function updateContent() {
+            // 获取筛选条件
+            const year = document.getElementById('yearFilter').value;
+            const type = document.getElementById('typeFilter').value;
+            const minRating = parseFloat(document.getElementById('ratingFilter').value);
+            const sortBy = document.getElementById('sortBy').value;
+            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            // 第一步：筛选数据
+            let filteredData = appleTVContent.filter(item => {
+                // 年份筛选
+                const itemYear = new Date(item.date).getFullYear().toString();
+                const yearMatch = year === 'all' || itemYear === year;
+                // 类型筛选
+                const typeMatch = type === 'all' || item.type === type;
+                // 评分筛选
+                const ratingMatch = item.rating >= minRating;
+                // 搜索筛选（匹配原名或中文名）
+                const searchMatch = item.title_en.toLowerCase().includes(searchText) || item.title_cn.toLowerCase().includes(searchText);
+
+                return yearMatch && typeMatch && ratingMatch && searchMatch;
+            });
+
+            // 第二步：排序数据
+            filteredData = sortData(filteredData, sortBy);
+
+            // 第三步：渲染数据
+            renderContent(filteredData);
+        }
+
+        // 6. 排序数据
+        function sortData(data, sortBy) {
+            const sortedData = [...data];
+            switch(sortBy) {
+                case 'date_asc': // 时间正序
+                    sortedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    break;
+                case 'date_desc': // 时间倒序
+                    sortedData.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    break;
+                case 'title_asc': // 标题正序（按中文名首字母）
+                    sortedData.sort((a, b) => a.title_cn.localeCompare(b.title_cn, 'zh-CN'));
+                    break;
+                case 'rating_desc': // 评分倒序
+                    sortedData.sort((a, b) => b.rating - a.rating);
+                    break;
+            }
+            return sortedData;
+        }
+
+        // 7. 渲染内容到页面
+        function renderContent(data) {
+            const contentGrid = document.getElementById('contentGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            // 清空原有内容
+            contentGrid.innerHTML = '';
+
+            // 无数据时显示空状态
+            if (data.length === 0) {
+                contentGrid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            // 有数据时隐藏空状态，渲染卡片
+            contentGrid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            // 遍历数据生成卡片
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md overflow-hidden card-hover content-auto';
+                card.innerHTML = `
+                    <img src="${item.img}" alt="${item.title_cn}" class="w-full h-80 object-cover">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-lg font-bold text-apple-dark">${item.title_cn}</h3>
+                            <span class="bg-apple-blue text-white text-sm px-2 py-1 rounded-full">${item.rating}</span>
+                        </div>
+                        <p class="text-gray-500 text-sm mb-2">${item.title_en}</p>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">${item.type}</span>
+                            <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">${new Date(item.date).getFullYear()}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm line-clamp-3">${item.desc}</p>
+                    </div>
+                `;
+                contentGrid.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
