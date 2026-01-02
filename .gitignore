@@ -1,3 +1,6 @@
-__pycache__/timer.cpython-313.pyc
-/.vs
-/c/test/.vscode
+#忽略根目录和所有子目录下的.vs和.vscode文件夹
+.vs/
+.vscode/
+
+#忽略所有的.exe可执行文件
+*.exe
