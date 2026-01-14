@@ -21,3 +21,4 @@ clock
 c/test/get_sysinf
 c/test/main
 
+/py/prj_test/__pycache__
