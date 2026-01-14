@@ -18,3 +18,6 @@
 #忽略可执行文件（编译生成的二进制文件）
 c_test
 clock
+c/test/get_sysinf
+c/test/main
+
