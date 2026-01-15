@@ -335,8 +335,9 @@ void CreateButtons(HWND hWnd)
     };
     int x = 10, y = 70;
     int i;
+    int btnCount = sizeof(button_texts) / sizeof(button_texts[0]);
 
-    for(i = 0; i < 20; i++)
+    for(i = 0; i < btnCount; i++)
     {
         if(i % 4 == 0 && i != 0)
         {
@@ -356,7 +357,7 @@ void CreateButtons(HWND hWnd)
             WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
             x, y, width, height,
             hWnd,
-            (HMENU)button_ids[i],
+            (HMENU)(INT_PTR)button_ids[i],
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);
 
