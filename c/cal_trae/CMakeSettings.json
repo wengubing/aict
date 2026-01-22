@@ -1,0 +1,21 @@
+{
+  "configurations": [
+    {
+      "name": "MinGW-GCC-Debug",
+      "generator": "MinGW Makefiles",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "mingw_64" ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "-DCMAKE_C_COMPILER=C:/MinGW/bin/gcc.exe -DCMAKE_CXX_COMPILER=C:/MinGW/bin/g++.exe",
+      "buildCommandArgs": "-- -j%NUMBER_OF_PROCESSORS%",
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
+          "value": true
+        }
+      ]
+    }
+  ]
+}

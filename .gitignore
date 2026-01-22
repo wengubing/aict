@@ -22,3 +22,9 @@ c/test/get_sysinf
 c/test/main
 
 /py/prj_test/__pycache__
+/desktop.ini
+
+#忽略vs相关文件
+*.vcxproj.user
+/c/cal_trae/out/build/MinGW-GCC-Debug
+*.log
