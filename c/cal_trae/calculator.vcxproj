@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E6B8F7A1-9A5B-4C2E-8F7A-1A2B3C4D5E6F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>calculator</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <!-- NMake commands use gcc from your MinGW install. If gcc not in PATH, replace "gcc" with full path, e.g. C:\\MinGW\\bin\\gcc.exe -->
+    <NMakeBuildCommandLine>gcc -g "$(ProjectDir)calculator.c" -o "$(ProjectDir)calculator.exe" -lgdi32 -lcomctl32 -mwindows</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>if exist "$(ProjectDir)calculator.exe" del /f "$(ProjectDir)calculator.exe" &amp; gcc -g "$(ProjectDir)calculator.c" -o "$(ProjectDir)calculator.exe" -lgdi32 -lcomctl32 -mwindows</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>if exist "$(ProjectDir)calculator.exe" del /f "$(ProjectDir)calculator.exe"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)calculator.exe</NMakeOutput>
+    <LocalDebuggerCommand>$(ProjectDir)calculator.exe</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <NMakeBuildCommandLine>gcc -O2 "$(ProjectDir)calculator.c" -o "$(ProjectDir)calculator.exe" -lgdi32 -lcomctl32 -mwindows</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>if exist "$(ProjectDir)calculator.exe" del /f "$(ProjectDir)calculator.exe" &amp; gcc -O2 "$(ProjectDir)calculator.c" -o "$(ProjectDir)calculator.exe" -lgdi32 -lcomctl32 -mwindows</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>if exist "$(ProjectDir)calculator.exe" del /f "$(ProjectDir)calculator.exe"</NMakeCleanCommandLine>
+    <NMakeOutput>$(ProjectDir)calculator.exe</NMakeOutput>
+    <LocalDebuggerCommand>$(ProjectDir)calculator.exe</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="calculator.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
