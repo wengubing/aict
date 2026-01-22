@@ -26,3 +26,5 @@ c/test/main
 
 #忽略vs相关文件
 *.vcxproj.user
+/c/cal_trae/out/build/MinGW-GCC-Debug
+*.log

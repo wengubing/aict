@@ -44,5 +44,8 @@
   <ItemGroup>
     <ClCompile Include="calculator.c" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
