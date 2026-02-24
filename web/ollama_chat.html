@@ -44,6 +44,14 @@
     padding: 8px 10px;
     min-width: 180px;
   }
+  .bar select {
+    background: #0f1728;
+    color: var(--text);
+    border: 1px solid #223055;
+    border-radius: 8px;
+    padding: 8px 10px;
+    min-width: 220px;
+  }
   .bar button {
     background: var(--accent);
     color: #051126;
@@ -107,8 +115,13 @@
 <body>
 <div class="wrap">
   <div class="bar">
+    <label for="apiBase">API:</label>
+    <input id="apiBase" value="http://127.0.0.1:11434" />
     <label for="model">Model:</label>
-    <input id="model" value="gemma3:1b" />
+    <select id="model">
+      <option value="">Loading models...</option>
+    </select>
+    <button class="secondary" onclick="loadModels()">Refresh Models</button>
     <button id="sendBtn" onclick="send()">Send</button>
     <button class="secondary" onclick="clearChat()">Clear</button>
     <div id="status" class="status"></div>
@@ -123,9 +136,74 @@
 
 <script>
 const messages = []
+const DEFAULT_API_BASE = window.location.protocol.startsWith("http")
+  ? `${window.location.protocol}//${window.location.hostname}:11434`
+  : "http://127.0.0.1:11434"
+
+function getApiBase() {
+  const input = document.getElementById("apiBase")
+  const value = input.value.trim().replace(/\/$/, "")
+  return value || DEFAULT_API_BASE
+}
+
+function saveApiBase() {
+  const base = getApiBase()
+  localStorage.setItem("ollama_api_base", base)
+}
+
+function formatLoadError(err) {
+  const msg = String(err)
+  if (msg.includes("TypeError") || msg.includes("Load failed") || msg.includes("Failed to fetch")) {
+    return "连接失败：请先确认 ollama serve 已启动；若通过 file:// 打开本页，请改用 python3 -m http.server 8000 后访问 http://127.0.0.1:8000/web/ollama_chat.html；如仍失败，设置 OLLAMA_ORIGINS=http://127.0.0.1:8000,http://localhost:8000 后重启 ollama。"
+  }
+  return msg
+}
 
 function setStatus(text) {
   document.getElementById("status").textContent = text
+}
+
+async function loadModels() {
+  const modelSelect = document.getElementById("model")
+  saveApiBase()
+  setStatus("Loading models...")
+
+  try {
+    const res = await fetch(`${getApiBase()}/api/tags`)
+    if (!res.ok) {
+      throw new Error(`Failed to load models (${res.status})`)
+    }
+
+    const data = await res.json()
+    const names = (data.models || []).map(item => item.name).filter(Boolean)
+
+    modelSelect.innerHTML = ""
+    if (names.length === 0) {
+      const option = document.createElement("option")
+      option.value = ""
+      option.textContent = "No local models found"
+      modelSelect.appendChild(option)
+      setStatus("No local models. Run: ollama pull <model>")
+      return
+    }
+
+    for (const name of names) {
+      const option = document.createElement("option")
+      option.value = name
+      option.textContent = name
+      modelSelect.appendChild(option)
+    }
+
+    modelSelect.value = names[0]
+    setStatus(`Loaded ${names.length} model(s).`)
+  } catch (err) {
+    modelSelect.innerHTML = ""
+    const option = document.createElement("option")
+    option.value = ""
+    option.textContent = "Failed to load models"
+    modelSelect.appendChild(option)
+    setStatus(formatLoadError(err))
+  }
 }
 
 function appendMessage(role, content) {
@@ -150,10 +228,11 @@ async function send() {
 
   const model = document.getElementById("model").value.trim()
   if (!model) {
-    setStatus("Please enter a model name.")
+    setStatus("Please select a model.")
     return
   }
 
+  saveApiBase()
   setStatus("")
   input.value = ""
   document.getElementById("sendBtn").disabled = true
@@ -165,7 +244,7 @@ async function send() {
   let assistantText = ""
 
   try {
-    const res = await fetch("http://127.0.0.1:11434/api/chat", {
+    const res = await fetch(`${getApiBase()}/api/chat`, {
       method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify({
@@ -210,7 +289,8 @@ async function send() {
 
     messages.push({ role: "assistant", content: assistantText })
   } catch (err) {
-    assistantBubble.textContent = String(err)
+    assistantBubble.textContent = formatLoadError(err)
+    setStatus(formatLoadError(err))
   } finally {
     document.getElementById("sendBtn").disabled = false
   }
@@ -228,6 +308,17 @@ document.getElementById("q").addEventListener("keydown", (event) => {
     send()
   }
 })
+
+document.getElementById("apiBase").addEventListener("change", () => {
+  loadModels()
+})
+
+const savedApiBase = localStorage.getItem("ollama_api_base")
+if (savedApiBase) {
+  document.getElementById("apiBase").value = savedApiBase
+}
+
+loadModels()
 </script>
 </body>
 </html>
