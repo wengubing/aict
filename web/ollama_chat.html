@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+<textarea id="q"></textarea>
+<button onclick="send()">Send</button>
+<pre id="out"></pre>
+
+<script>
+async function send() {
+  const res = await fetch("http://127.0.0.1:11434/api/generate", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      model:"llama3",
+      prompt: document.getElementById("q").value
+    })
+  })
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+
+  while(true){
+    const {done,value} = await reader.read()
+    if(done) break
+    document.getElementById("out").textContent += decoder.decode(value)
+  }
+}
+</script>
+</body>
+</html>
