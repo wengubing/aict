@@ -1,30 +1,233 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="utf-8" />
+<title>Ollama Chat</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --panel: #121a2b;
+    --text: #e8eefc;
+    --muted: #9db0d1;
+    --accent: #3aa6ff;
+    --user: #1f6feb;
+    --assistant: #2b364f;
+  }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: radial-gradient(1200px 600px at 20% -10%, #1a2a4d 0%, transparent 60%),
+                linear-gradient(180deg, #0b1220 0%, #0a0f1a 100%);
+    color: var(--text);
+  }
+  .wrap {
+    max-width: 920px;
+    margin: 24px auto;
+    padding: 16px;
+  }
+  .bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+  .bar label { color: var(--muted); }
+  .bar input {
+    background: #0f1728;
+    color: var(--text);
+    border: 1px solid #223055;
+    border-radius: 8px;
+    padding: 8px 10px;
+    min-width: 180px;
+  }
+  .bar button {
+    background: var(--accent);
+    color: #051126;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .bar button.secondary {
+    background: #1f2c48;
+    color: var(--text);
+  }
+  .status { color: var(--muted); font-size: 12px; }
+  .chat {
+    margin-top: 16px;
+    background: var(--panel);
+    border-radius: 16px;
+    padding: 16px;
+    min-height: 320px;
+    max-height: 60vh;
+    overflow: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+  .msg {
+    display: flex;
+    margin: 8px 0;
+  }
+  .bubble {
+    padding: 10px 12px;
+    border-radius: 12px;
+    white-space: pre-wrap;
+    line-height: 1.45;
+    max-width: 80%;
+  }
+  .user .bubble {
+    margin-left: auto;
+    background: var(--user);
+  }
+  .assistant .bubble {
+    margin-right: auto;
+    background: var(--assistant);
+  }
+  .composer {
+    margin-top: 16px;
+    display: grid;
+    gap: 8px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    background: #0f1728;
+    color: var(--text);
+    border: 1px solid #223055;
+    border-radius: 12px;
+    padding: 12px;
+    resize: vertical;
+  }
+</style>
+</head>
 <body>
-<textarea id="q"></textarea>
-<button onclick="send()">Send</button>
-<pre id="out"></pre>
+<div class="wrap">
+  <div class="bar">
+    <label for="model">Model:</label>
+    <input id="model" value="gemma3:1b" />
+    <button id="sendBtn" onclick="send()">Send</button>
+    <button class="secondary" onclick="clearChat()">Clear</button>
+    <div id="status" class="status"></div>
+  </div>
+
+  <div id="chat" class="chat"></div>
+
+  <div class="composer">
+    <textarea id="q" placeholder="Type a message. Shift+Enter for a new line."></textarea>
+  </div>
+</div>
 
 <script>
+const messages = []
+
+function setStatus(text) {
+  document.getElementById("status").textContent = text
+}
+
+function appendMessage(role, content) {
+  const chat = document.getElementById("chat")
+  const row = document.createElement("div")
+  row.className = `msg ${role}`
+
+  const bubble = document.createElement("div")
+  bubble.className = "bubble"
+  bubble.textContent = content
+
+  row.appendChild(bubble)
+  chat.appendChild(row)
+  chat.scrollTop = chat.scrollHeight
+  return bubble
+}
+
 async function send() {
-  const res = await fetch("http://127.0.0.1:11434/api/generate", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      model:"llama3",
-      prompt: document.getElementById("q").value
+  const input = document.getElementById("q")
+  const text = input.value.trim()
+  if (!text) return
+
+  const model = document.getElementById("model").value.trim()
+  if (!model) {
+    setStatus("Please enter a model name.")
+    return
+  }
+
+  setStatus("")
+  input.value = ""
+  document.getElementById("sendBtn").disabled = true
+
+  messages.push({ role: "user", content: text })
+  appendMessage("user", text)
+
+  const assistantBubble = appendMessage("assistant", "")
+  let assistantText = ""
+
+  try {
+    const res = await fetch("http://127.0.0.1:11434/api/chat", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model,
+        messages
+      })
     })
-  })
 
-  const reader = res.body.getReader()
-  const decoder = new TextDecoder()
+    if (!res.ok || !res.body) {
+      const errText = await res.text()
+      assistantBubble.textContent = errText || `Request failed (${res.status})`
+      return
+    }
 
-  while(true){
-    const {done,value} = await reader.read()
-    if(done) break
-    document.getElementById("out").textContent += decoder.decode(value)
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ""
+
+    while(true){
+      const {done,value} = await reader.read()
+      if(done) break
+      buffer += decoder.decode(value, { stream: true })
+
+      let lineEnd = buffer.indexOf("\n")
+      while (lineEnd !== -1) {
+        const line = buffer.slice(0, lineEnd).trim()
+        buffer = buffer.slice(lineEnd + 1)
+        lineEnd = buffer.indexOf("\n")
+
+        if (!line) continue
+        try {
+          const chunk = JSON.parse(line)
+          if (chunk.message && chunk.message.content) {
+            assistantText += chunk.message.content
+            assistantBubble.textContent = assistantText
+          }
+        } catch (err) {
+          // Ignore partial JSON lines while streaming.
+        }
+      }
+    }
+
+    messages.push({ role: "assistant", content: assistantText })
+  } catch (err) {
+    assistantBubble.textContent = String(err)
+  } finally {
+    document.getElementById("sendBtn").disabled = false
   }
 }
+
+function clearChat() {
+  messages.length = 0
+  document.getElementById("chat").innerHTML = ""
+  setStatus("")
+}
+
+document.getElementById("q").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault()
+    send()
+  }
+})
 </script>
 </body>
 </html>
