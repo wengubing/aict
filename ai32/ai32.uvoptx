@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ProjectOpt xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_optx.xsd">
+
+  <SchemaVersion>2.1</SchemaVersion>
+
+  <Header>### uVision Project, (C) Keil Software</Header>
+
+  <Extensions>
+    <cExt>*.c</cExt>
+    <aExt>*.s*; *.src; *.a*</aExt>
+    <oExt>*.obj</oExt>
+    <lExt>*.lib</lExt>
+    <tExt>*.txt; *.h; *.inc</tExt>
+    <pExt>*.plm</pExt>
+    <CppX>*.cpp</CppX>
+    <nMigrate>0</nMigrate>
+  </Extensions>
+
+  <EavEnv>
+    <EVDSN>0</EVDSN>
+    <EVICU>0</EVICU>
+    <EVIG>0</EVIG>
+    <EVSWB>0</EVSWB>
+  </EavEnv>
+
+  <TargetOption>
+
+    <TargetName>Target 1</TargetName>
+
+    <ToolsetNumber>0x4</ToolsetNumber>
+    <ToolsetName>ARM-ADS</ToolsetName>
+    <PathWithFileName>ai32.uvprojx</PathWithFileName>
+    <LastSavedErrLevel>0</LastSavedErrLevel>
+    <uAC6>0</uAC6>
+
+    <CLKADS>16000000</CLKADS>
+    <OPTTT>
+      <gFlags>1</gFlags>
+      <BeepAtEnd>1</BeepAtEnd>
+      <RunSim>1</RunSim>
+      <RunTarget>0</RunTarget>
+      <RunAbUc>0</RunAbUc>
+    </OPTTT>
+
+    <OPTHX>
+      <HexSelection>1</HexSelection>
+      <FlashSelection>0</FlashSelection>
+      <Download>0</Download>
+      <HexRangeLowAddress>0</HexRangeLowAddress>
+      <HexRangeHighAddress>0</HexRangeHighAddress>
+      <HexOffset>0</HexOffset>
+      <Oh166RecLen>16</Oh166RecLen>
+    </OPTHX>
+
+    <OPTLEX>
+      <PageWidth>79</PageWidth>
+      <PageLength>66</PageLength>
+      <TabStop>8</TabStop>
+      <ListingPath>.\Listings\</ListingPath>
+    </OPTLEX>
+
+    <OPTXL>
+      <LMapFile>1</LMapFile>
+      <LComSec>1</LComSec>
+      <LSymSec>1</LSymSec>
+      <LSzSec>1</LSzSec>
+      <LAXSec>1</LAXSec>
+      <LSupSec>1</LSupSec>
+      <LFPSec>1</LFPSec>
+      <LLibSec>0</LLibSec>
+      <LFcsSec>1</LFcsSec>
+      <LBcsSec>1</LBcsSec>
+      <LDbgSec>1</LDbgSec>
+      <LChkSec>0</LChkSec>
+      <LCombSec>1</LCombSec>
+      <LGenSec>0</LGenSec>
+    </OPTXL>
+
+    <OPTFL>
+      <tvExp>1</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <IsCurrentTarget>1</IsCurrentTarget>
+    </OPTFL>
+
+    <CpuCode>255</CpuCode>
+
+    <DebugOpt>
+      <!-- Use Simulator (1 = simulator, 0 = target hardware) -->
+      <uSim>1</uSim>
+      <uTrg>0</uTrg>
+      <sLdApp>1</sLdApp>
+      <sGomain>1</sGomain>
+      <sRbreak>1</sRbreak>
+      <sRwatch>1</sRwatch>
+      <sRmem>1</sRmem>
+      <sRfunc>1</sRfunc>
+      <sRbox>1</sRbox>
+      <tLdApp>1</tLdApp>
+      <tGomain>0</tGomain>
+      <tRbreak>1</tRbreak>
+      <tRwatch>1</tRwatch>
+      <tRmem>1</tRmem>
+      <tRfunc>0</tRfunc>
+      <tRbox>1</tRbox>
+      <tRtrace>0</tRtrace>
+      <sRunDeb>0</sRunDeb>
+      <sLrtime>0</sLrtime>
+      <nTsel>-1</nTsel>
+      <sDllName>SARMCM3.DLL</sDllName>
+      <sDllArguments> -MPU</sDllArguments>
+      <sDlgDll>DCM.DLL</sDlgDll>
+      <!-- -pCM4 selects the Cortex-M4 peripheral simulation model -->
+      <sDlgArguments>-pCM4</sDlgArguments>
+      <tDllName>SARMCM3.DLL</tDllName>
+      <tDllArguments> -MPU</tDllArguments>
+      <tDlgDll>TCM.DLL</tDlgDll>
+      <tDlgArguments>-pCM4</tDlgArguments>
+      <sIfile></sIfile>
+      <tIfile></tIfile>
+      <pMon>BIN\ULP2CM3.DLL</pMon>
+    </DebugOpt>
+
+    <TargetDriverDllRegistry>
+      <SetRegEntry>
+        <Number>0</Number>
+        <Key>DLGTARM</Key>
+        <!-- UART1 (USART1) window mapped to COM1 -->
+        <!-- Format: (1) = UART1, COM1 = PC serial port number                 -->
+        <!-- Change COM1 to the actual COM port number on your PC.             -->
+        <!-- In the simulator, open Peripherals > UART #1 to see/send data.   -->
+        <Name>DLGUART</Name>
+        <!-- UART window for USART1: show window, connect to COM1              -->
+        <!-- Value: &lt;unit&gt;=1 &lt;port&gt;=COM1 (adjust COM1 as needed) -->
+      </SetRegEntry>
+    </TargetDriverDllRegistry>
+
+    <!-- Simulator UART → physical COM port mapping                            -->
+    <!-- In the Keil debug session:                                            -->
+    <!--   1. Start Debug (Ctrl+F5)                                            -->
+    <!--   2. Peripherals > UART #1  (shows USART1 I/O)                       -->
+    <!--   3. Click "Connect" and choose a COM port to bridge to the           -->
+    <!--      simulated USART1.  Send characters from a terminal app           -->
+    <!--      (e.g. PuTTY / TeraTerm) at 115200-8N1 to control PA1.           -->
+    <SimDlls>
+      <CpuDll></CpuDll>
+      <CpuDllArguments></CpuDllArguments>
+      <PeripheralDll></PeripheralDll>
+      <PeripheralDllArguments></PeripheralDllArguments>
+      <InitializationFile></InitializationFile>
+    </SimDlls>
+
+    <TargetDlls>
+      <CpuDll></CpuDll>
+      <CpuDllArguments></CpuDllArguments>
+      <PeripheralDll></PeripheralDll>
+      <PeripheralDllArguments></PeripheralDllArguments>
+      <InitializationFile></InitializationFile>
+      <Driver>BIN\ULP2CM3.DLL</Driver>
+    </TargetDlls>
+
+  </TargetOption>
+
+  <!-- Per-file build options (all use project defaults) -->
+  <Group>
+    <GroupName>User</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>1</GroupNumber>
+      <FileNumber>1</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>User\main.c</PathWithFileName>
+      <FilenameWithoutPath>main.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+  </Group>
+
+  <Group>
+    <GroupName>Device</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>2</GroupNumber>
+      <FileNumber>2</FileNumber>
+      <FileType>2</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>Device\Source\startup_stm32f407xx.s</PathWithFileName>
+      <FilenameWithoutPath>startup_stm32f407xx.s</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>2</GroupNumber>
+      <FileNumber>3</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>Device\Source\system_stm32f4xx.c</PathWithFileName>
+      <FilenameWithoutPath>system_stm32f4xx.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+  </Group>
+
+  <Group>
+    <GroupName>CMSIS</GroupName>
+    <tvExp>0</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+  </Group>
+
+</ProjectOpt>
