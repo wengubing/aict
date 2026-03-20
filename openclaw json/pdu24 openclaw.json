@@ -10,6 +10,35 @@
       "workspace": "/home/w/.openclaw/workspace"
     }
   },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "CldOllamaGpt": {
+        "baseUrl": "https://ollama.com/v1",
+        "apiKey": "d5896378f2ec4fe7887e1cfadef3d010.Fr1mHEsM30OT-_bvLlV9KagD",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "gpt-oss:120b",
+            "name": "gpt-oss:120b",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 200000,
+            "maxTokens": 8192,
+            "api": "openai-completions"
+          }
+        ]
+      }
+    }
+  },
   "tools": {
     "profile": "coding"
   },
