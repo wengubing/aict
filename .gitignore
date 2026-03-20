@@ -2,6 +2,12 @@
 .vs/
 .vscode/
 
+#忽略各级目录下的构建输出文件夹
+**/build/
+**/ztemp/
+**/DebugConfig/
+**/RTE/
+
 #忽略所有的.exe可执行文件
 *.exe
 
@@ -28,3 +34,7 @@ c/test/main
 *.vcxproj.user
 /c/cal_trae/out/build/MinGW-GCC-Debug
 *.log
+
+#其它
+*.scvd
+*.wxb
