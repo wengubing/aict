@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.13",
+    "lastTouchedAt": "2026-03-22T09:40:34.680Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-03-21T16:38:47.455Z",
+    "lastRunVersion": "2026.3.13",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "update": {
+    "channel": "stable"
+  },
+  "ui": {
+    "assistant": {
+      "name": "opc"
+    }
+  },
+  "models": {
+    "mode": "replace",
+    "providers": {
+      "ollama.com": {
+        "baseUrl": "https://ollama.com/v1",
+        "apiKey": "d5896378f2ec4fe7887e1cfadef3d010.Fr1mHEsM30OT-_bvLlV9KagD",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "gpt-oss:120b",
+            "name": "gpt-oss:120b",
+            "compat": {
+              "supportsStore": false
+            }
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "ollama.com/gpt-oss:120b"
+      },
+      "workspace": "/root/.openclaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      },
+      "sandbox": {
+        "mode": "off"
+      }
+    }
+  },
+  "tools": {
+    "profile": "full",
+    "exec": {
+      "host": "sandbox"
+    }
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "session-memory": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "channels": {
+    "qqbot": {
+      "enabled": true,
+      "allowFrom": [
+        "*"
+      ],
+      "appId": "102905605",
+      "clientSecret": "Wl0FUjzFVl1HXo5MduBSk2KcuCUn6Pi1"
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://127.0.0.1:18789",
+        "http://43.156.66.224:18789",
+        "http://sg24:18789",
+        "http://sg24.forijk.cn:18789"
+      ],
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    },
+    "auth": {
+      "mode": "password",
+      "token": "22f78ce6cbe628c70fd31387484a6df8db3ecf2bdc67714a",
+      "password": "wen123"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "contacts.add",
+        "calendar.add",
+        "reminders.add",
+        "sms.send"
+      ]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "qqbot": {
+        "enabled": true
+      },
+      "openclaw-weixin": {
+        "enabled": true
+      }
+    },
+    "installs": {
+      "qqbot": {
+        "source": "npm",
+        "spec": "@sliverp/qqbot@latest",
+        "installPath": "/root/.openclaw/extensions/qqbot",
+        "version": "1.6.1",
+        "resolvedName": "@sliverp/qqbot",
+        "resolvedVersion": "1.6.1",
+        "resolvedSpec": "@sliverp/qqbot@1.6.1",
+        "integrity": "sha512-8cPcFiWSTWV10wb84waoiNKrxtp0pk6gZ3xZhtI/HsB9tmH/tyIsadkhJYq7w4xyeTzfQDDJHOBCM1JaIUCEmQ==",
+        "shasum": "dd78bdb0516adf11599202b3d377e4cfeb235a66",
+        "resolvedAt": "2026-03-18T06:52:45.857Z",
+        "installedAt": "2026-03-18T06:56:42.688Z"
+      },
+      "openclaw-weixin": {
+        "source": "npm",
+        "spec": "@tencent-weixin/openclaw-weixin",
+        "installPath": "/root/.openclaw/extensions/openclaw-weixin",
+        "version": "1.0.2",
+        "resolvedName": "@tencent-weixin/openclaw-weixin",
+        "resolvedVersion": "1.0.2",
+        "resolvedSpec": "@tencent-weixin/openclaw-weixin@1.0.2",
+        "integrity": "sha512-kYPEowHB/0VWt9nQFee/AS6Fb+jbnu38wjkgZDBdKTuJoBL0IBW2obQ0ymgFKBFJJL9rDwnFrb/17ORGZD/X8Q==",
+        "shasum": "244baf0a873683a9c350d0f0b5bc055c07b0eb39",
+        "resolvedAt": "2026-03-22T09:39:08.694Z",
+        "installedAt": "2026-03-22T09:40:17.796Z"
+      }
+    }
+  }
+}
