@@ -9,6 +9,11 @@
     "lastRunCommand": "onboard",
     "lastRunMode": "local"
   },
+  "ui": {
+    "assistant": {
+      "name": "sg22"
+    }
+  },
   "models": {
     "mode": "merge",
     "providers": {
