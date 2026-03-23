@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.11",
+    "lastTouchedAt": "2026-03-22T09:22:27.988Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-03-20T05:46:26.346Z",
+    "lastRunVersion": "2026.3.11",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "ollama.com": {
+        "baseUrl": "https://ollama.com/v1",
+        "apiKey": "d5896378f2ec4fe7887e1cfadef3d010.Fr1mHEsM30OT-_bvLlV9KagD",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "gpt-oss:120b",
+            "name": "gpt-oss:120b",
+            "compat": {
+              "supportsStore": false
+            }
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "ollama.com/gpt-oss:120b"
+      },
+      "workspace": "/root/.openclaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      }
+    }
+  },
+  "tools": {
+    "profile": "full",
+    "deny": [
+      "browser",
+      "web_search",
+      "web_fetch"
+    ]
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "channels": {
+    "lightclawbot": {
+      "enabled": true,
+      "apiKeys": [
+        "02202dc09dc7440c3c0ac304873e629e21ae97d3"
+      ]
+    },
+    "qqbot": {
+      "enabled": true,
+      "appId": "1903163490",
+      "clientSecret": "BIG2h9RcnvxsfEZg"
+    }
+  },
+  "gateway": {
+    "port": 27572,
+    "mode": "local",
+    "bind": "lan",
+    "controlUi": {
+      "basePath": "/h2euin",
+      "allowedOrigins": [
+        "http://43.156.74.16:27572",
+        "http://sg22:27572",
+        "http://sg22.forijk.cn:27572"
+      ],
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    },
+    "auth": {
+      "mode": "password",
+      "token": "375458e29c99c0a62fa91a7265b54acc21736403ff2a3dc9",
+      "password": "wen123"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "skills": {
+    "install": {
+      "nodeManager": "npm"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "feishu": {
+        "enabled": true
+      },
+      "lightclawbot": {
+        "enabled": true
+      },
+      "openclaw-qqbot": {
+        "enabled": true
+      },
+      "ddingtalk": {
+        "enabled": true
+      },
+      "wecom": {
+        "enabled": true
+      },
+      "adp-openclaw": {
+        "enabled": true
+      },
+      "openclaw-plugin-yuanbao": {
+        "enabled": true
+      },
+      "openclaw-weixin": {
+        "enabled": true
+      }
+    },
+    "installs": {
+      "lightclawbot": {
+        "source": "npm",
+        "spec": "lightclawbot",
+        "installPath": "/root/.openclaw/extensions/lightclawbot",
+        "version": "1.0.7",
+        "installedAt": "2026-03-20T05:53:42.000Z"
+      },
+      "openclaw-qqbot": {
+        "source": "npm",
+        "spec": "@tencent-connect/openclaw-qqbot@1.6.3",
+        "installPath": "/root/.openclaw/extensions/openclaw-qqbot",
+        "version": "1.6.3",
+        "installedAt": "2026-03-22T09:23:43.000Z"
+      },
+      "ddingtalk": {
+        "source": "npm",
+        "spec": "@largezhou/ddingtalk",
+        "installPath": "/root/.openclaw/extensions/ddingtalk",
+        "version": "1.4.2",
+        "installedAt": "2026-03-22T09:24:04.000Z"
+      },
+      "wecom": {
+        "source": "npm",
+        "spec": "@mocrane/wecom",
+        "installPath": "/root/.openclaw/extensions/wecom",
+        "version": "2026.3.20",
+        "installedAt": "2026-03-22T09:24:44.000Z"
+      },
+      "adp-openclaw": {
+        "source": "npm",
+        "spec": "adp-openclaw",
+        "installPath": "/root/.openclaw/extensions/adp-openclaw",
+        "version": "0.0.69",
+        "installedAt": "2026-03-22T09:24:47.000Z"
+      },
+      "openclaw-plugin-yuanbao": {
+        "source": "npm",
+        "spec": "openclaw-plugin-yuanbao@1.0.3",
+        "installPath": "/root/.openclaw/extensions/openclaw-plugin-yuanbao",
+        "version": "1.0.3",
+        "installedAt": "2026-03-22T09:24:53.000Z"
+      },
+      "openclaw-weixin": {
+        "source": "npm",
+        "spec": "@tencent-weixin/openclaw-weixin",
+        "installPath": "/root/.openclaw/extensions/openclaw-weixin",
+        "version": "1.0.2",
+        "installedAt": "2026-03-22T09:24:57.000Z"
+      }
+    }
+  }
+}
