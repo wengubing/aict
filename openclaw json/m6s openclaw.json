@@ -1,9 +1,18 @@
 {
+  "meta": {
+    "lastTouchedVersion": "2026.3.23-2",
+    "lastTouchedAt": "2026-03-24T04:39:42.770Z"
+  },
   "wizard": {
     "lastRunAt": "2026-03-24T03:38:47.513Z",
     "lastRunVersion": "2026.3.23-2",
     "lastRunCommand": "onboard",
     "lastRunMode": "local"
+  },
+  "ui": {
+    "assistant": {
+      "name": "m6s"
+    }
   },
   "agents": {
     "defaults": {
@@ -31,10 +40,22 @@
   "gateway": {
     "port": 18789,
     "mode": "local",
-    "bind": "loopback",
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://127.0.0.1:18789",
+        "http://192.168.2.188:18789",
+        "http://m6s:18789",
+        "http://m6s.local:18789"
+      ],
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    },
     "auth": {
-      "mode": "token",
-      "token": "51560de297f8f7842061187e618c069ff6d0114abbea7c6f"
+      "mode": "password",
+      "token": "51560de297f8f7842061187e618c069ff6d0114abbea7c6f",
+      "password": "wen123"
     },
     "tailscale": {
       "mode": "off",
@@ -58,9 +79,5 @@
         "enabled": true
       }
     }
-  },
-  "meta": {
-    "lastTouchedVersion": "2026.3.23-2",
-    "lastTouchedAt": "2026-03-24T03:38:47.579Z"
   }
 }
