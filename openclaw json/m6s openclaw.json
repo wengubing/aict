@@ -80,7 +80,7 @@
           }
         ]
       },
-      "custom-ollama-com": {
+      "ollama-cloud": {
         "baseUrl": "https://ollama.com/v1",
         "apiKey": "d5896378f2ec4fe7887e1cfadef3d010.Fr1mHEsM30OT-_bvLlV9KagD",
         "api": "openai-completions",
@@ -108,12 +108,12 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "custom-ollama-com/gpt-oss:120b"
+        "primary": "ollama-cloud/gpt-oss:120b"
       },
       "models": {
         "ollama/gemma3:1b": {},
-        "custom-ollama-com/gpt-oss:120b": {
-          "alias": "ollama-cloud"
+        "ollama-cloud/gpt-oss:120b": {
+          "alias": "ollama-cloud-gpt-oss-120b"
         }
       },
       "workspace": "/home/w/.openclaw/workspace"
