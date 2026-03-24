@@ -1,7 +1,7 @@
 {
   "meta": {
     "lastTouchedVersion": "2026.3.23-2",
-    "lastTouchedAt": "2026-03-24T07:36:16.509Z"
+    "lastTouchedAt": "2026-03-24T08:25:21.782Z"
   },
   "wizard": {
     "lastRunAt": "2026-03-24T07:36:16.447Z",
@@ -116,7 +116,10 @@
           "alias": "ollama-cloud-gpt-oss-120b"
         }
       },
-      "workspace": "/home/w/.openclaw/workspace"
+      "workspace": "/home/w/.openclaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      }
     }
   },
   "tools": {
@@ -145,6 +148,11 @@
           "enabled": true
         }
       }
+    }
+  },
+  "channels": {
+    "openclaw-weixin": {
+      "accounts": {}
     }
   },
   "gateway": {
@@ -187,6 +195,40 @@
     "entries": {
       "duckduckgo": {
         "enabled": true
+      },
+      "openclaw-weixin": {
+        "enabled": true
+      },
+      "openclaw-qqbot": {
+        "enabled": true
+      }
+    },
+    "installs": {
+      "openclaw-weixin": {
+        "source": "npm",
+        "spec": "@tencent-weixin/openclaw-weixin@latest",
+        "installPath": "/home/w/.openclaw/extensions/openclaw-weixin",
+        "version": "2.0.1",
+        "resolvedName": "@tencent-weixin/openclaw-weixin",
+        "resolvedVersion": "2.0.1",
+        "resolvedSpec": "@tencent-weixin/openclaw-weixin@2.0.1",
+        "integrity": "sha512-Ib7onvLU8a1ox9craMZxPwrN+ffJQJbToZzeMwoYryBOMIoBlVY0oCuQF7BZvZ7GRQQKOSSAdxvFkO47hKu0rg==",
+        "shasum": "06339fdc83226454e1286221889fd62c76ae2463",
+        "resolvedAt": "2026-03-24T07:48:37.075Z",
+        "installedAt": "2026-03-24T07:50:22.612Z"
+      },
+      "openclaw-qqbot": {
+        "source": "npm",
+        "spec": "@tencent-connect/openclaw-qqbot@latest",
+        "installPath": "/home/w/.openclaw/extensions/openclaw-qqbot",
+        "version": "1.6.4",
+        "resolvedName": "@tencent-connect/openclaw-qqbot",
+        "resolvedVersion": "1.6.4",
+        "resolvedSpec": "@tencent-connect/openclaw-qqbot@1.6.4",
+        "integrity": "sha512-1tMIqKOlhTk+8mZA/G9uTSbMp8cspLjv0Z2jpfn+Ewz6kz2zbmZa9mxbXwOhg67/hwEGiUgYHB7nKQ1QQjjvkQ==",
+        "shasum": "d0db258464aa7bb935af3d920ea93668af0be537",
+        "resolvedAt": "2026-03-24T08:19:37.296Z",
+        "installedAt": "2026-03-24T08:24:44.593Z"
       }
     }
   }
