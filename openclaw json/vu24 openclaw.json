@@ -1,0 +1,156 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.13",
+    "lastTouchedAt": "2026-03-23T02:48:45.228Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-03-18T03:23:00.088Z",
+    "lastRunVersion": "2026.3.13",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "models": {
+    "providers": {
+      "ollama-cloud": {
+        "baseUrl": "https://ollama.com",
+        "apiKey": "d5896378f2ec4fe7887e1cfadef3d010.Fr1mHEsM30OT-_bvLlV9KagD",
+        "api": "ollama",
+        "models": [
+          {
+            "id": "gpt-oss:120b",
+            "name": "GPT-OSS 120B (Cloud)",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 131072
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "ollama-cloud/gpt-oss:120b",
+        "fallbacks": [
+          "ollama/gemma3:1b"
+        ]
+      },
+      "models": {
+        "ollama-cloud/gpt-oss:120b": {},
+        "ollama/gemma3:1b": {}
+      },
+      "workspace": "/home/wxb/.openclaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    }
+  },
+  "tools": {
+    "profile": "messaging"
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "session-memory": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "channels": {
+    "qqbot": {
+      "enabled": true,
+      "allowFrom": [
+        "*"
+      ],
+      "appId": "102914378",
+      "clientSecret": "yqUu50h8KGyQdaHj"
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://127.0.0.1:18789",
+        "http://192.168.27.110:18789",
+        "http://vu24:18789",
+        "http://vu24.forijk.cn:18789"
+      ],
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    },
+    "auth": {
+      "mode": "password",
+      "token": "1b303c20e38bd7c9085e92fa18e261f5f7c4619447136627",
+      "password": "wen123"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "calendar.add",
+        "contacts.add",
+        "reminders.add"
+      ]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "qqbot": {
+        "enabled": true
+      },
+      "openclaw-weixin": {
+        "enabled": true
+      }
+    },
+    "installs": {
+      "openclaw-weixin": {
+        "source": "npm",
+        "spec": "@tencent-weixin/openclaw-weixin",
+        "installPath": "/home/wxb/.openclaw/extensions/openclaw-weixin",
+        "version": "1.0.2",
+        "resolvedName": "@tencent-weixin/openclaw-weixin",
+        "resolvedVersion": "1.0.2",
+        "resolvedSpec": "@tencent-weixin/openclaw-weixin@1.0.2",
+        "integrity": "sha512-kYPEowHB/0VWt9nQFee/AS6Fb+jbnu38wjkgZDBdKTuJoBL0IBW2obQ0ymgFKBFJJL9rDwnFrb/17ORGZD/X8Q==",
+        "shasum": "244baf0a873683a9c350d0f0b5bc055c07b0eb39",
+        "resolvedAt": "2026-03-23T02:45:15.879Z",
+        "installedAt": "2026-03-23T02:48:28.529Z"
+      }
+    }
+  }
+}

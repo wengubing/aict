@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "profiles": {
+    "ollama:default": {
+      "type": "api_key",
+      "provider": "ollama",
+      "key": "ollama-local"
+    },
+    "ollama-jkmac:default": {
+      "type": "api_key",
+      "provider": "ollama-jkmac",
+      "key": "ollama-local"
+    },
+    "ollama-zbook:default": {
+      "type": "api_key",
+      "provider": "ollama-zbook",
+      "key": "ollama-local"
+    }
+  },
+  "lastGood": {
+    "ollama": "ollama:default",
+    "ollama-jkmac": "ollama-jkmac:default",
+    "ollama-zbook": "ollama-zbook:default"
+  },
+  "usageStats": {
+    "ollama:default": {
+      "errorCount": 0,
+      "lastUsed": 1774492348291
+    },
+    "ollama-jkmac:default": {
+      "errorCount": 0,
+      "lastUsed": 1774492753231
+    },
+    "ollama-zbook:default": {
+      "errorCount": 0,
+      "lastUsed": 1774492753231
+    }
+  }
+}
