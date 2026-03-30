@@ -413,6 +413,14 @@
     },
     "openclaw-weixin": {
       "accounts": {}
+    },
+    "qqbot": {
+      "enabled": true,
+      "allowFrom": [
+        "*"
+      ],
+      "appId": 1903271715,
+      "clientSecret": "P2fIvYBpT7lP3iN2hM1hN3jP5lS9qXEv"
     }
   },
   "gateway": {
