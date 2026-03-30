@@ -1,10 +1,10 @@
 {
   "meta": {
     "lastTouchedVersion": "2026.3.28",
-    "lastTouchedAt": "2026-03-30T05:04:36.091Z"
+    "lastTouchedAt": "2026-03-30T08:10:29.249Z"
   },
   "wizard": {
-    "lastRunAt": "2026-03-30T05:04:36.077Z",
+    "lastRunAt": "2026-03-30T08:01:50.382Z",
     "lastRunVersion": "2026.3.28",
     "lastRunCommand": "onboard",
     "lastRunMode": "local"
@@ -370,7 +370,10 @@
         "ollama-com/gpt-oss:120b": {},
         "ollama/qwen3.5:0.8b": {}
       },
-      "workspace": "/Users/wxb/.openclaw/workspace"
+      "workspace": "/Users/wxb/.openclaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      }
     }
   },
   "tools": {
@@ -393,6 +396,23 @@
           "enabled": true
         }
       }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "botToken": "8612619657:AAHobNZHEnEmONdQ8eQjdOIkkcohx1kzUeE",
+      "groups": {
+        "*": {
+          "requireMention": true
+        }
+      },
+      "groupPolicy": "allowlist",
+      "streaming": "partial"
+    },
+    "openclaw-weixin": {
+      "accounts": {}
     }
   },
   "gateway": {
@@ -436,6 +456,46 @@
         "reminders.add",
         "sms.send"
       ]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "openclaw-weixin": {
+        "enabled": true,
+        "config": {}
+      },
+      "qqbot": {
+        "enabled": true,
+        "config": {}
+      }
+    },
+    "installs": {
+      "openclaw-weixin": {
+        "source": "npm",
+        "spec": "@tencent-weixin/openclaw-weixin@latest",
+        "installPath": "/Users/wxb/.openclaw/extensions/openclaw-weixin",
+        "version": "2.1.1",
+        "resolvedName": "@tencent-weixin/openclaw-weixin",
+        "resolvedVersion": "2.1.1",
+        "resolvedSpec": "@tencent-weixin/openclaw-weixin@2.1.1",
+        "integrity": "sha512-lSiTI+9eQQuvZXehuteNps3Ia4/ih5zml6QEgICwA2+9xT1sd5z8C+ldgRfrYd8lZTxYWC8ffkLtG0EVo2E7Ag==",
+        "shasum": "574c53a912986bc6b97ae672c1af0327f8be2fcb",
+        "resolvedAt": "2026-03-30T08:03:19.683Z",
+        "installedAt": "2026-03-30T08:04:02.258Z"
+      },
+      "qqbot": {
+        "source": "npm",
+        "spec": "@sliverp/qqbot@latest",
+        "installPath": "/Users/wxb/.openclaw/extensions/qqbot",
+        "version": "1.6.1",
+        "resolvedName": "@sliverp/qqbot",
+        "resolvedVersion": "1.6.1",
+        "resolvedSpec": "@sliverp/qqbot@1.6.1",
+        "integrity": "sha512-8cPcFiWSTWV10wb84waoiNKrxtp0pk6gZ3xZhtI/HsB9tmH/tyIsadkhJYq7w4xyeTzfQDDJHOBCM1JaIUCEmQ==",
+        "shasum": "dd78bdb0516adf11599202b3d377e4cfeb235a66",
+        "resolvedAt": "2026-03-30T08:08:52.932Z",
+        "installedAt": "2026-03-30T08:10:28.599Z"
+      }
     }
   }
 }
