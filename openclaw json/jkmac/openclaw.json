@@ -1,7 +1,7 @@
 {
   "meta": {
     "lastTouchedVersion": "2026.3.28",
-    "lastTouchedAt": "2026-03-30T08:10:29.249Z"
+    "lastTouchedAt": "2026-03-30T10:03:04.864Z"
   },
   "wizard": {
     "lastRunAt": "2026-03-30T08:01:50.382Z",
@@ -399,6 +399,17 @@
     }
   },
   "channels": {
+    "openclaw-weixin": {
+      "accounts": {}
+    },
+    "qqbot": {
+      "allowFrom": [
+        "*"
+      ],
+      "appId": 1903271715,
+      "clientSecret": "P2fIvYBpT7lP3iN2hM1hN3jP5lS9qXEv",
+      "enabled": true
+    },
     "telegram": {
       "enabled": true,
       "dmPolicy": "pairing",
@@ -410,17 +421,6 @@
       },
       "groupPolicy": "allowlist",
       "streaming": "partial"
-    },
-    "openclaw-weixin": {
-      "accounts": {}
-    },
-    "qqbot": {
-      "enabled": true,
-      "allowFrom": [
-        "*"
-      ],
-      "appId": 1903271715,
-      "clientSecret": "P2fIvYBpT7lP3iN2hM1hN3jP5lS9qXEv"
     }
   },
   "gateway": {
@@ -441,9 +441,8 @@
       "dangerouslyDisableDeviceAuth": true
     },
     "auth": {
-      "mode": "password",
-      "token": "e4867595c602a22a503bbccc36a0378f2979a6d8267c4410",
-      "password": "wen123"
+      "mode": "token",
+      "token": "88a57558211ab124b197d5316187b207d1603f358979420f"
     },
     "tailscale": {
       "mode": "off",
