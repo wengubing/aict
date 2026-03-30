@@ -9,6 +9,11 @@
     "lastRunCommand": "onboard",
     "lastRunMode": "local"
   },
+  "ui": {
+    "assistant": {
+      "name": "jkmac"
+    }
+  },
   "agents": {
     "defaults": {
       "workspace": "/Users/wxb/.openclaw/workspace"
@@ -39,12 +44,23 @@
   "gateway": {
     "port": 18789,
     "mode": "local",
-    "bind": "loopback",
+    "bind": "lan",
     "controlUi": {
-      "allowInsecureAuth": true
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://127.0.0.1:18789",
+        "http://192.168.27.103:18789",
+        "http://jkmac:18789",
+        "http://jkmac.local:18789",
+        "http://100.85.11.49:18789",
+        "http://jkmac.tail705b47.ts.net:18789"
+      ],
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
     },
     "auth": {
-      "mode": "token",
+      "mode": "password",
+      "password": "wen123",
       "token": "e4867595c602a22a503bbccc36a0378f2979a6d8267c4410"
     },
     "tailscale": {
