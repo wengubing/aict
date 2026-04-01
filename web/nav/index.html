@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>导航主页</title>
+		<link rel="stylesheet" href="./styles.css">
+	</head>
+	<body>
+		<div class="drawer-mask" id="drawerMask"></div>
+		<main class="app">
+			<aside class="drawer-panel" id="drawerPanel">
+				<div class="drawer-header">
+					<h1>网址导航</h1>
+					<div class="top-actions">
+						<button class="icon-btn" id="addDrawer" title="新增抽屉">＋</button>
+					</div>
+				</div>
+				<section class="drawer-list" id="drawerList"></section>
+			</aside>
+
+			<section class="content-panel">
+				<header class="content-header">
+					<div>
+						<button class="icon-btn mobile-toggle" id="mobileToggle" title="打开抽屉">☰</button>
+						<h2 id="drawerTitle">加载中...</h2>
+					</div>
+					<div class="top-actions">
+						<button class="ghost-btn" id="editToggle">编辑模式</button>
+						<button class="primary-btn" id="addSite">新增网址</button>
+					</div>
+				</header>
+
+				<section class="site-grid" id="siteGrid"></section>
+			</section>
+		</main>
+
+		<script src="./app.js" defer></script>
+	</body>
+</html>
