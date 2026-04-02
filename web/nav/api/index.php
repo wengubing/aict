@@ -434,6 +434,19 @@ function webdav_request(string $method, string $url, string $username, string $p
     return ['status' => $status, 'body' => (string) $responseBody];
 }
 
+function verify_webdav_backup(string $url, string $username, string $password): void
+{
+    $check = webdav_request('GET', $url, $username, $password, null);
+    if ($check['status'] !== 200) {
+        throw new RuntimeException('云端回读校验失败，HTTP ' . $check['status']);
+    }
+
+    $decoded = json_decode($check['body'], true);
+    if (!is_array($decoded) || !isset($decoded['drawers']) || !is_array($decoded['drawers'])) {
+        throw new RuntimeException('云端回读内容不是有效备份 JSON');
+    }
+}
+
 function build_webdav_url(string $baseUrl, string $remotePath): string
 {
     return $baseUrl . '/' . str_replace('%2F', '/', rawurlencode($remotePath));
@@ -526,7 +539,10 @@ try {
             throw new RuntimeException('云备份失败，HTTP ' . $res['status']);
         }
 
-        send_json(200, ['ok' => true]);
+        // Prevent false-positive success when provider returns 2xx but did not persist file.
+        verify_webdav_backup($url, $cfg['username'], $cfg['password']);
+
+        send_json(200, ['ok' => true, 'remoteFile' => $cfg['remoteFile']]);
     }
 
     if ($method === 'POST' && $path === '/webdav/restore') {

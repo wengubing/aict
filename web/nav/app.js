@@ -141,9 +141,10 @@ async function cloudBackup(silent = false) {
   }
   cloudBusy = true;
   try {
-    await api("/webdav/backup", { method: "POST" });
+    const result = await api("/webdav/backup", { method: "POST" });
     if (!silent) {
-      alert("已备份到云端");
+      const tip = result?.remoteFile ? `已备份到云端: ${result.remoteFile}` : "已备份到云端";
+      alert(tip);
     }
   } finally {
     cloudBusy = false;
