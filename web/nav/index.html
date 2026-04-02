@@ -20,6 +20,25 @@
 		</section>
 
 		<div class="drawer-mask" id="drawerMask"></div>
+		<section class="cloud-config-modal hidden" id="cloudConfigModal">
+			<div class="cloud-config-card">
+				<h3>云备份配置</h3>
+				<form id="cloudConfigForm" class="cloud-config-form">
+					<label>WebDAV地址<input id="cloudBaseUrl" type="url" required></label>
+					<label>用户名<input id="cloudUsername" type="text" required></label>
+					<label>密码/应用密码<input id="cloudPassword" type="password" required></label>
+					<label>云端文件路径<input id="cloudRemoteFile" type="text" required></label>
+					<label class="cloud-check"><input id="autoBackupEnabled" type="checkbox">启用自动备份到云</label>
+					<label>自动备份间隔(分钟)<input id="autoBackupMinutes" type="number" min="5" step="1"></label>
+					<label class="cloud-check"><input id="autoRestoreEnabled" type="checkbox">启用自动从云恢复</label>
+					<label>自动恢复间隔(分钟)<input id="autoRestoreMinutes" type="number" min="5" step="1"></label>
+					<div class="cloud-actions">
+						<button type="button" class="ghost-btn" id="cloudConfigCancel">取消</button>
+						<button type="submit" class="primary-btn">保存配置</button>
+					</div>
+				</form>
+			</div>
+		</section>
 		<main class="app">
 			<aside class="drawer-panel" id="drawerPanel">
 				<div class="drawer-header">

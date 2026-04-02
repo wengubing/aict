@@ -23,17 +23,28 @@ const restoreFileInputEl = document.querySelector("#restoreFileInput");
 const cloudConfigBtnEl = document.querySelector("#cloudConfigBtn");
 const cloudBackupBtnEl = document.querySelector("#cloudBackupBtn");
 const cloudRestoreBtnEl = document.querySelector("#cloudRestoreBtn");
+const cloudConfigModalEl = document.querySelector("#cloudConfigModal");
+const cloudConfigFormEl = document.querySelector("#cloudConfigForm");
+const cloudConfigCancelEl = document.querySelector("#cloudConfigCancel");
+const cloudBaseUrlEl = document.querySelector("#cloudBaseUrl");
+const cloudUsernameEl = document.querySelector("#cloudUsername");
+const cloudPasswordEl = document.querySelector("#cloudPassword");
+const cloudRemoteFileEl = document.querySelector("#cloudRemoteFile");
+const autoBackupEnabledEl = document.querySelector("#autoBackupEnabled");
+const autoBackupMinutesEl = document.querySelector("#autoBackupMinutes");
+const autoRestoreEnabledEl = document.querySelector("#autoRestoreEnabled");
+const autoRestoreMinutesEl = document.querySelector("#autoRestoreMinutes");
 const logoutBtnEl = document.querySelector("#logoutBtn");
 const API_BASE = "./api/index.php";
 const PASSCODE = document.body.dataset.passcode || "";
 const AUTH_KEY = "nav_auth_until";
 const AUTH_TTL_MS = 24 * 60 * 60 * 1000;
-const WEBDAV_KEY = "nav_webdav_config";
 
 let initialized = false;
 let autoBackupTimer = null;
 let autoRestoreTimer = null;
 let cloudBusy = false;
+let cloudConfig = null;
 
 async function api(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -64,101 +75,59 @@ function clearAuthenticated() {
   localStorage.removeItem(AUTH_KEY);
 }
 
-function getCloudConfig() {
-  try {
-    const raw = localStorage.getItem(WEBDAV_KEY);
-    if (!raw) {
-      return {
-        baseUrl: "https://dav.jianguoyun.com/dav",
-        username: "",
-        password: "",
-        remoteFile: "nav-backup/nav-data.json",
-        autoBackupEnabled: false,
-        autoBackupMinutes: 60,
-        autoRestoreEnabled: false,
-        autoRestoreMinutes: 120
-      };
-    }
-    const parsed = JSON.parse(raw);
-    return {
-      baseUrl: String(parsed.baseUrl || "https://dav.jianguoyun.com/dav"),
-      username: String(parsed.username || ""),
-      password: String(parsed.password || ""),
-      remoteFile: String(parsed.remoteFile || "nav-backup/nav-data.json"),
-      autoBackupEnabled: Boolean(parsed.autoBackupEnabled),
-      autoBackupMinutes: Math.max(5, Number(parsed.autoBackupMinutes) || 60),
-      autoRestoreEnabled: Boolean(parsed.autoRestoreEnabled),
-      autoRestoreMinutes: Math.max(5, Number(parsed.autoRestoreMinutes) || 120)
-    };
-  } catch {
-    return {
-      baseUrl: "https://dav.jianguoyun.com/dav",
-      username: "",
-      password: "",
-      remoteFile: "nav-backup/nav-data.json",
-      autoBackupEnabled: false,
-      autoBackupMinutes: 60,
-      autoRestoreEnabled: false,
-      autoRestoreMinutes: 120
-    };
-  }
+function getDefaultCloudConfig() {
+  return {
+    baseUrl: "https://dav.jianguoyun.com/dav",
+    username: "",
+    password: "",
+    remoteFile: "nav-backup/nav-data.json",
+    autoBackupEnabled: false,
+    autoBackupMinutes: 60,
+    autoRestoreEnabled: false,
+    autoRestoreMinutes: 120
+  };
 }
 
-function saveCloudConfig(config) {
-  localStorage.setItem(WEBDAV_KEY, JSON.stringify(config));
+function getCloudConfig() {
+  return cloudConfig || getDefaultCloudConfig();
 }
 
 function hasCloudCredentials(config) {
   return Boolean(config.baseUrl && config.username && config.password && config.remoteFile);
 }
 
-function promptCloudConfig() {
+function fillCloudConfigForm() {
   const current = getCloudConfig();
-  const baseUrl = prompt("WebDAV地址", current.baseUrl);
-  if (!baseUrl) {
-    return null;
-  }
+  cloudBaseUrlEl.value = current.baseUrl;
+  cloudUsernameEl.value = current.username;
+  cloudPasswordEl.value = current.password;
+  cloudRemoteFileEl.value = current.remoteFile;
+  autoBackupEnabledEl.checked = current.autoBackupEnabled;
+  autoBackupMinutesEl.value = String(current.autoBackupMinutes);
+  autoRestoreEnabledEl.checked = current.autoRestoreEnabled;
+  autoRestoreMinutesEl.value = String(current.autoRestoreMinutes);
+}
 
-  const username = prompt("WebDAV用户名", current.username);
-  if (!username) {
-    return null;
-  }
-
-  const password = prompt("WebDAV应用密码/登录密码", current.password);
-  if (!password) {
-    return null;
-  }
-
-  const remoteFile = prompt("云端文件路径", current.remoteFile) || current.remoteFile;
-  const autoBackupEnabled = confirm("是否启用自动定时备份到云？");
-  const autoBackupMinutes = autoBackupEnabled
-    ? Math.max(5, Number(prompt("自动备份间隔(分钟, >=5)", String(current.autoBackupMinutes)) || current.autoBackupMinutes))
-    : current.autoBackupMinutes;
-
-  const autoRestoreEnabled = confirm("是否启用自动定时从云恢复？(谨慎开启)");
-  const autoRestoreMinutes = autoRestoreEnabled
-    ? Math.max(5, Number(prompt("自动恢复间隔(分钟, >=5)", String(current.autoRestoreMinutes)) || current.autoRestoreMinutes))
-    : current.autoRestoreMinutes;
-
+function readCloudConfigForm() {
   return {
-    baseUrl: baseUrl.trim(),
-    username: username.trim(),
-    password: password.trim(),
-    remoteFile: remoteFile.trim(),
-    autoBackupEnabled,
-    autoBackupMinutes,
-    autoRestoreEnabled,
-    autoRestoreMinutes
+    baseUrl: cloudBaseUrlEl.value.trim(),
+    username: cloudUsernameEl.value.trim(),
+    password: cloudPasswordEl.value.trim(),
+    remoteFile: cloudRemoteFileEl.value.trim(),
+    autoBackupEnabled: autoBackupEnabledEl.checked,
+    autoBackupMinutes: Math.max(5, Number(autoBackupMinutesEl.value) || 60),
+    autoRestoreEnabled: autoRestoreEnabledEl.checked,
+    autoRestoreMinutes: Math.max(5, Number(autoRestoreMinutesEl.value) || 120)
   };
 }
 
-function buildCloudPayload(config) {
-  return {
-    baseUrl: config.baseUrl,
-    username: config.username,
-    password: config.password,
-    remoteFile: config.remoteFile
-  };
+function openCloudConfigModal() {
+  fillCloudConfigForm();
+  cloudConfigModalEl.classList.remove("hidden");
+}
+
+function closeCloudConfigModal() {
+  cloudConfigModalEl.classList.add("hidden");
 }
 
 async function cloudBackup(silent = false) {
@@ -172,10 +141,7 @@ async function cloudBackup(silent = false) {
   }
   cloudBusy = true;
   try {
-    await api("/webdav/backup", {
-      method: "POST",
-      body: JSON.stringify(buildCloudPayload(config))
-    });
+    await api("/webdav/backup", { method: "POST" });
     if (!silent) {
       alert("已备份到云端");
     }
@@ -195,11 +161,10 @@ async function cloudRestore(silent = false) {
   }
   cloudBusy = true;
   try {
-    await api("/webdav/restore", {
-      method: "POST",
-      body: JSON.stringify(buildCloudPayload(config))
-    });
+    await api("/webdav/restore", { method: "POST" });
     await loadData();
+    await loadCloudConfig();
+    setupAutoJobs();
     if (!silent) {
       alert("已从云端恢复");
     }
@@ -243,6 +208,19 @@ function setupAutoJobs() {
   }
 }
 
+async function loadCloudConfig() {
+  const cfg = await api("/config");
+  cloudConfig = cfg?.webdav ? cfg.webdav : getDefaultCloudConfig();
+}
+
+async function persistCloudConfig(config) {
+  const saved = await api("/config", {
+    method: "PUT",
+    body: JSON.stringify({ webdav: config })
+  });
+  cloudConfig = saved?.webdav ? saved.webdav : config;
+}
+
 function lockApp() {
   document.body.classList.add("auth-locked");
   authScreenEl.classList.remove("hidden");
@@ -261,6 +239,7 @@ async function startApp() {
   }
   initialized = true;
   await loadData();
+  await loadCloudConfig();
   setupAutoJobs();
 }
 
@@ -497,6 +476,8 @@ async function restoreFromFile(file) {
     body: JSON.stringify(parsed)
   });
   await loadData();
+  await loadCloudConfig();
+  setupAutoJobs();
 }
 
 editToggleEl.addEventListener("click", () => {
@@ -512,13 +493,30 @@ restoreBtnEl.addEventListener("click", () => {
   restoreFileInputEl.click();
 });
 cloudConfigBtnEl.addEventListener("click", () => {
-  const config = promptCloudConfig();
-  if (!config) {
+  openCloudConfigModal();
+});
+cloudConfigCancelEl.addEventListener("click", closeCloudConfigModal);
+cloudConfigModalEl.addEventListener("click", (ev) => {
+  if (ev.target === cloudConfigModalEl) {
+    closeCloudConfigModal();
+  }
+});
+cloudConfigFormEl.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const config = readCloudConfigForm();
+  if (!hasCloudCredentials(config)) {
+    alert("请完整填写 WebDAV 地址、用户名、密码和云端文件路径");
     return;
   }
-  saveCloudConfig(config);
-  setupAutoJobs();
-  alert("云配置已保存");
+
+  try {
+    await persistCloudConfig(config);
+    setupAutoJobs();
+    closeCloudConfigModal();
+    alert("云配置已保存到 nav-data.json");
+  } catch (err) {
+    alert(err.message || "保存云配置失败");
+  }
 });
 cloudBackupBtnEl.addEventListener("click", async () => {
   try {

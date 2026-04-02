@@ -44,5 +44,17 @@
                 }
             ]
         }
-    ]
+    ],
+    "config": {
+        "webdav": {
+            "baseUrl": "https://dav.jianguoyun.com/dav",
+            "username": "",
+            "password": "",
+            "remoteFile": "nav-backup/nav-data.json",
+            "autoBackupEnabled": false,
+            "autoBackupMinutes": 60,
+            "autoRestoreEnabled": false,
+            "autoRestoreMinutes": 120
+        }
+    }
 }

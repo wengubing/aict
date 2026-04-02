@@ -85,6 +85,69 @@ body.auth-locked .app {
   margin-top: 10px;
 }
 
+.cloud-config-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 18;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(9, 22, 26, 0.45);
+}
+
+.cloud-config-modal.hidden {
+  display: none;
+}
+
+.cloud-config-card {
+  width: min(560px, 96vw);
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 18px 48px rgba(7, 26, 28, 0.2);
+  padding: 18px;
+}
+
+.cloud-config-card h3 {
+  margin: 0 0 12px;
+}
+
+.cloud-config-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+}
+
+.cloud-config-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #355258;
+  font-size: 14px;
+}
+
+.cloud-config-form input[type="text"],
+.cloud-config-form input[type="url"],
+.cloud-config-form input[type="password"],
+.cloud-config-form input[type="number"] {
+  border: 1px solid #b6cfd2;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.cloud-check {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+}
+
+.cloud-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .app {
   min-height: 100vh;
   display: grid;
@@ -333,6 +396,10 @@ body.auth-locked .app {
 @media (max-width: 900px) {
   .auth-form {
     flex-direction: column;
+  }
+
+  .cloud-config-form {
+    grid-template-columns: 1fr;
   }
 
   .app {

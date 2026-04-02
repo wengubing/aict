@@ -54,6 +54,27 @@ function make_id(string $prefix): string
     return $prefix . '_' . base_convert((string) time(), 10, 36) . '_' . substr(bin2hex(random_bytes(4)), 0, 6);
 }
 
+function default_webdav_config(): array
+{
+    return [
+        'baseUrl' => 'https://dav.jianguoyun.com/dav',
+        'username' => '',
+        'password' => '',
+        'remoteFile' => 'nav-backup/nav-data.json',
+        'autoBackupEnabled' => false,
+        'autoBackupMinutes' => 60,
+        'autoRestoreEnabled' => false,
+        'autoRestoreMinutes' => 120,
+    ];
+}
+
+function default_config(): array
+{
+    return [
+        'webdav' => default_webdav_config(),
+    ];
+}
+
 function ensure_data_file(): void
 {
     if (is_file(DATA_FILE)) {
@@ -82,6 +103,7 @@ function ensure_data_file(): void
                 ],
             ],
         ],
+        'config' => default_config(),
     ];
 
     file_put_contents(DATA_FILE, json_encode($seed, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT), LOCK_EX);
@@ -97,8 +119,14 @@ function read_data(): array
 
     $parsed = json_decode($raw, true);
     if (!is_array($parsed) || !isset($parsed['drawers']) || !is_array($parsed['drawers'])) {
-        return ['drawers' => []];
+        return ['drawers' => [], 'config' => default_config()];
     }
+
+    if (!isset($parsed['config']) || !is_array($parsed['config'])) {
+        $parsed['config'] = default_config();
+    }
+
+    $parsed['config']['webdav'] = normalize_webdav_config_settings((array) ($parsed['config']['webdav'] ?? []));
 
     return $parsed;
 }
@@ -238,13 +266,37 @@ function &find_site(array &$drawer, string $siteId): array
     return $null;
 }
 
-function normalize_data(array $raw): array
+function normalize_webdav_config_settings(array $input): array
+{
+    $defaults = default_webdav_config();
+    return [
+        'baseUrl' => rtrim(trim((string) ($input['baseUrl'] ?? $defaults['baseUrl'])), '/'),
+        'username' => trim((string) ($input['username'] ?? $defaults['username'])),
+        'password' => trim((string) ($input['password'] ?? $defaults['password'])),
+        'remoteFile' => ltrim(trim((string) ($input['remoteFile'] ?? $defaults['remoteFile'])), '/'),
+        'autoBackupEnabled' => (bool) ($input['autoBackupEnabled'] ?? $defaults['autoBackupEnabled']),
+        'autoBackupMinutes' => max(5, (int) ($input['autoBackupMinutes'] ?? $defaults['autoBackupMinutes'])),
+        'autoRestoreEnabled' => (bool) ($input['autoRestoreEnabled'] ?? $defaults['autoRestoreEnabled']),
+        'autoRestoreMinutes' => max(5, (int) ($input['autoRestoreMinutes'] ?? $defaults['autoRestoreMinutes'])),
+    ];
+}
+
+function normalize_data(array $raw, ?array $fallbackConfig = null): array
 {
     if (!isset($raw['drawers']) || !is_array($raw['drawers'])) {
         throw new InvalidArgumentException('恢复数据格式错误：缺少 drawers 数组');
     }
 
-    $result = ['drawers' => []];
+    $result = [
+        'drawers' => [],
+        'config' => is_array($fallbackConfig) ? $fallbackConfig : default_config(),
+    ];
+
+    if (isset($raw['config']) && is_array($raw['config'])) {
+        $result['config'] = [
+            'webdav' => normalize_webdav_config_settings((array) ($raw['config']['webdav'] ?? [])),
+        ];
+    }
     foreach ($raw['drawers'] as $drawer) {
         if (!is_array($drawer)) {
             continue;
@@ -328,6 +380,12 @@ function normalize_webdav_config(array $body): array
     ];
 }
 
+function require_webdav_credentials(array $cfg): array
+{
+    $cfg = normalize_webdav_config($cfg);
+    return $cfg;
+}
+
 function webdav_request(string $method, string $url, string $username, string $password, ?string $body = null): array
 {
     $ch = curl_init($url);
@@ -403,6 +461,20 @@ try {
         send_json(200, read_data());
     }
 
+    if ($method === 'GET' && $path === '/config') {
+        $data = read_data();
+        send_json(200, $data['config']);
+    }
+
+    if ($method === 'PUT' && $path === '/config') {
+        $data = read_data();
+        $body = read_json_body();
+        $webdavInput = isset($body['webdav']) && is_array($body['webdav']) ? $body['webdav'] : [];
+        $data['config']['webdav'] = normalize_webdav_config_settings($webdavInput);
+        write_data($data);
+        send_json(200, $data['config']);
+    }
+
     if ($method === 'GET' && $path === '/backup') {
         $data = read_data();
         $filename = 'nav-backup-' . date('Ymd-His') . '.json';
@@ -410,8 +482,9 @@ try {
     }
 
     if ($method === 'POST' && $path === '/restore') {
+        $current = read_data();
         $body = read_json_body();
-        $normalized = normalize_data($body);
+        $normalized = normalize_data($body, $current['config'] ?? default_config());
         write_data($normalized);
         send_json(200, ['ok' => true, 'drawers' => count($normalized['drawers'])]);
     }
@@ -421,7 +494,12 @@ try {
             throw new RuntimeException('PHP 未启用 cURL 扩展，无法使用 WebDAV');
         }
 
-        $cfg = normalize_webdav_config(read_json_body());
+        $body = read_json_body();
+        if ($body !== []) {
+            $cfg = require_webdav_credentials($body);
+        } else {
+            $cfg = require_webdav_credentials((array) (read_data()['config']['webdav'] ?? []));
+        }
         ensure_webdav_dirs($cfg['baseUrl'], $cfg['username'], $cfg['password'], $cfg['remoteFile']);
 
         $json = json_encode(read_data(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
@@ -443,7 +521,12 @@ try {
             throw new RuntimeException('PHP 未启用 cURL 扩展，无法使用 WebDAV');
         }
 
-        $cfg = normalize_webdav_config(read_json_body());
+        $body = read_json_body();
+        if ($body !== []) {
+            $cfg = require_webdav_credentials($body);
+        } else {
+            $cfg = require_webdav_credentials((array) (read_data()['config']['webdav'] ?? []));
+        }
         $url = build_webdav_url($cfg['baseUrl'], $cfg['remoteFile']);
         $res = webdav_request('GET', $url, $cfg['username'], $cfg['password'], null);
         if ($res['status'] !== 200) {
