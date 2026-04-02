@@ -404,6 +404,8 @@ function webdav_request(string $method, string $url, string $username, string $p
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_TIMEOUT => 20,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2,
         CURLOPT_USERPWD => $username . ':' . $password,
         CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
         CURLOPT_HTTPHEADER => $headers,
@@ -411,7 +413,18 @@ function webdav_request(string $method, string $url, string $username, string $p
 
     $responseBody = curl_exec($ch);
     $err = curl_error($ch);
+    $errno = curl_errno($ch);
     $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if ($responseBody === false && $errno === CURLE_SSL_CACERT) {
+        // Fallback for hosts missing CA bundle. Prefer fixing server CA store for better security.
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        $responseBody = curl_exec($ch);
+        $err = curl_error($ch);
+        $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    }
+
     curl_close($ch);
 
     if ($responseBody === false) {
