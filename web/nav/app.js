@@ -17,6 +17,9 @@ const authScreenEl = document.querySelector("#authScreen");
 const authFormEl = document.querySelector("#authForm");
 const authInputEl = document.querySelector("#authInput");
 const authErrorEl = document.querySelector("#authError");
+const backupBtnEl = document.querySelector("#backupBtn");
+const restoreBtnEl = document.querySelector("#restoreBtn");
+const restoreFileInputEl = document.querySelector("#restoreFileInput");
 const logoutBtnEl = document.querySelector("#logoutBtn");
 const API_BASE = "./api/index.php";
 const PASSCODE = document.body.dataset.passcode || "";
@@ -284,6 +287,31 @@ function escapeAttr(input) {
   return escapeHtml(input).replaceAll("`", "");
 }
 
+function triggerBackup() {
+  const ts = Date.now();
+  window.location.href = `${API_BASE}/backup?t=${ts}`;
+}
+
+async function restoreFromFile(file) {
+  const text = await file.text();
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error("JSON 文件格式无效");
+  }
+
+  if (!parsed || !Array.isArray(parsed.drawers)) {
+    throw new Error("恢复文件缺少 drawers 数组");
+  }
+
+  await api("/restore", {
+    method: "POST",
+    body: JSON.stringify(parsed)
+  });
+  await loadData();
+}
+
 editToggleEl.addEventListener("click", () => {
   state.editMode = !state.editMode;
   render();
@@ -291,6 +319,28 @@ editToggleEl.addEventListener("click", () => {
 
 addDrawerEl.addEventListener("click", addDrawer);
 addSiteEl.addEventListener("click", addSite);
+backupBtnEl.addEventListener("click", triggerBackup);
+restoreBtnEl.addEventListener("click", () => {
+  restoreFileInputEl.value = "";
+  restoreFileInputEl.click();
+});
+restoreFileInputEl.addEventListener("change", async () => {
+  const file = restoreFileInputEl.files?.[0];
+  if (!file) {
+    return;
+  }
+
+  if (!confirm("恢复将覆盖当前全部抽屉和网址，确定继续吗？")) {
+    return;
+  }
+
+  try {
+    await restoreFromFile(file);
+    alert("恢复成功");
+  } catch (err) {
+    alert(err.message || "恢复失败");
+  }
+});
 mobileToggleEl.addEventListener("click", () => {
   drawerPanelEl.classList.add("open");
   drawerMaskEl.classList.add("show");

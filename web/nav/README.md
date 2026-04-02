@@ -28,6 +28,7 @@ php -S 127.0.0.1:8787
 - 自动适配 PC 与手机
 - 打开页面先进行口令验证，已登录状态自动保持 24 小时
 - 前端可新增/编辑/删除抽屉和网址
+- 提供 JSON 备份下载与本地文件恢复
 - 点击条目右上角 `✎` 可编辑抽屉信息或网址
 - 网址在新增/编辑时自动抓取标题和图标(失败时回退域名和通用 favicon)
 - 抽屉与网址数据持久化到 `nav-data.json`（PHP 读写）
@@ -41,6 +42,8 @@ php -S 127.0.0.1:8787
 ## 后端接口（PHP）
 
 - `GET ./api/index.php/nav`
+- `GET ./api/index.php/backup`
+- `POST ./api/index.php/restore`
 - `POST ./api/index.php/drawers`
 - `PUT ./api/index.php/drawers/:drawerId`
 - `DELETE ./api/index.php/drawers/:drawerId`
@@ -48,6 +51,12 @@ php -S 127.0.0.1:8787
 - `PUT ./api/index.php/drawers/:drawerId/sites/:siteId`
 - `DELETE ./api/index.php/drawers/:drawerId/sites/:siteId`
 - `POST ./api/index.php/preview`
+
+## 备份恢复使用
+
+- 页面点击“备份JSON”会下载当前数据快照文件
+- 页面点击“恢复JSON”可选择本地备份文件并覆盖恢复
+- 建议先备份再恢复，避免误覆盖
 
 ## Nginx 权限提示
 

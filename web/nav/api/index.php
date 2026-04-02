@@ -13,6 +13,16 @@ function send_json(int $status, array $payload): void
     exit;
 }
 
+function send_download_json(array $payload, string $filename): void
+{
+    header_remove('Content-Type');
+    header('Content-Type: application/json; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    http_response_code(200);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    exit;
+}
+
 function parse_path(): string
 {
     $pathInfo = $_SERVER['PATH_INFO'] ?? '';
@@ -21,6 +31,14 @@ function parse_path(): string
     }
 
     $uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $phpPos = strpos($uriPath, '.php');
+    if ($phpPos !== false) {
+        $afterPhp = substr($uriPath, $phpPos + 4);
+        if ($afterPhp !== false && $afterPhp !== '') {
+            return $afterPhp;
+        }
+    }
+
     $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 
     if ($scriptName !== '' && str_starts_with($uriPath, $scriptName)) {
@@ -220,6 +238,73 @@ function &find_site(array &$drawer, string $siteId): array
     return $null;
 }
 
+function normalize_data(array $raw): array
+{
+    if (!isset($raw['drawers']) || !is_array($raw['drawers'])) {
+        throw new InvalidArgumentException('恢复数据格式错误：缺少 drawers 数组');
+    }
+
+    $result = ['drawers' => []];
+    foreach ($raw['drawers'] as $drawer) {
+        if (!is_array($drawer)) {
+            continue;
+        }
+
+        $drawerId = trim((string) ($drawer['id'] ?? ''));
+        $drawerName = trim((string) ($drawer['name'] ?? ''));
+        $drawerColor = (string) ($drawer['color'] ?? '#156f52');
+        $sites = isset($drawer['sites']) && is_array($drawer['sites']) ? $drawer['sites'] : [];
+
+        if ($drawerId === '' || $drawerName === '') {
+            continue;
+        }
+
+        if (preg_match('/^#[0-9a-fA-F]{6}$/', $drawerColor) !== 1) {
+            $drawerColor = '#156f52';
+        }
+
+        $normalizedSites = [];
+        foreach ($sites as $site) {
+            if (!is_array($site)) {
+                continue;
+            }
+
+            $siteId = trim((string) ($site['id'] ?? ''));
+            $siteUrlRaw = trim((string) ($site['url'] ?? ''));
+            if ($siteId === '' || $siteUrlRaw === '') {
+                continue;
+            }
+
+            $siteUrl = sanitize_url($siteUrlRaw);
+            $siteTitle = trim((string) ($site['title'] ?? ''));
+            if ($siteTitle === '') {
+                $siteTitle = (string) (parse_url($siteUrl, PHP_URL_HOST) ?: $siteUrl);
+            }
+
+            $siteIcon = trim((string) ($site['icon'] ?? ''));
+            if ($siteIcon === '') {
+                $siteIcon = fallback_icon($siteUrl);
+            }
+
+            $normalizedSites[] = [
+                'id' => $siteId,
+                'url' => $siteUrl,
+                'title' => mb_substr($siteTitle, 0, 80),
+                'icon' => $siteIcon,
+            ];
+        }
+
+        $result['drawers'][] = [
+            'id' => $drawerId,
+            'name' => mb_substr($drawerName, 0, 30),
+            'color' => $drawerColor,
+            'sites' => $normalizedSites,
+        ];
+    }
+
+    return $result;
+}
+
 try {
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     $path = parse_path();
@@ -229,6 +314,19 @@ try {
 
     if ($method === 'GET' && $path === '/nav') {
         send_json(200, read_data());
+    }
+
+    if ($method === 'GET' && $path === '/backup') {
+        $data = read_data();
+        $filename = 'nav-backup-' . date('Ymd-His') . '.json';
+        send_download_json($data, $filename);
+    }
+
+    if ($method === 'POST' && $path === '/restore') {
+        $body = read_json_body();
+        $normalized = normalize_data($body);
+        write_data($normalized);
+        send_json(200, ['ok' => true, 'drawers' => count($normalized['drawers'])]);
     }
 
     if ($method === 'POST' && $path === '/preview') {
