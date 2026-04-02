@@ -20,13 +20,20 @@ const authErrorEl = document.querySelector("#authError");
 const backupBtnEl = document.querySelector("#backupBtn");
 const restoreBtnEl = document.querySelector("#restoreBtn");
 const restoreFileInputEl = document.querySelector("#restoreFileInput");
+const cloudConfigBtnEl = document.querySelector("#cloudConfigBtn");
+const cloudBackupBtnEl = document.querySelector("#cloudBackupBtn");
+const cloudRestoreBtnEl = document.querySelector("#cloudRestoreBtn");
 const logoutBtnEl = document.querySelector("#logoutBtn");
 const API_BASE = "./api/index.php";
 const PASSCODE = document.body.dataset.passcode || "";
 const AUTH_KEY = "nav_auth_until";
 const AUTH_TTL_MS = 24 * 60 * 60 * 1000;
+const WEBDAV_KEY = "nav_webdav_config";
 
 let initialized = false;
+let autoBackupTimer = null;
+let autoRestoreTimer = null;
+let cloudBusy = false;
 
 async function api(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -57,6 +64,185 @@ function clearAuthenticated() {
   localStorage.removeItem(AUTH_KEY);
 }
 
+function getCloudConfig() {
+  try {
+    const raw = localStorage.getItem(WEBDAV_KEY);
+    if (!raw) {
+      return {
+        baseUrl: "https://dav.jianguoyun.com/dav",
+        username: "",
+        password: "",
+        remoteFile: "nav-backup/nav-data.json",
+        autoBackupEnabled: false,
+        autoBackupMinutes: 60,
+        autoRestoreEnabled: false,
+        autoRestoreMinutes: 120
+      };
+    }
+    const parsed = JSON.parse(raw);
+    return {
+      baseUrl: String(parsed.baseUrl || "https://dav.jianguoyun.com/dav"),
+      username: String(parsed.username || ""),
+      password: String(parsed.password || ""),
+      remoteFile: String(parsed.remoteFile || "nav-backup/nav-data.json"),
+      autoBackupEnabled: Boolean(parsed.autoBackupEnabled),
+      autoBackupMinutes: Math.max(5, Number(parsed.autoBackupMinutes) || 60),
+      autoRestoreEnabled: Boolean(parsed.autoRestoreEnabled),
+      autoRestoreMinutes: Math.max(5, Number(parsed.autoRestoreMinutes) || 120)
+    };
+  } catch {
+    return {
+      baseUrl: "https://dav.jianguoyun.com/dav",
+      username: "",
+      password: "",
+      remoteFile: "nav-backup/nav-data.json",
+      autoBackupEnabled: false,
+      autoBackupMinutes: 60,
+      autoRestoreEnabled: false,
+      autoRestoreMinutes: 120
+    };
+  }
+}
+
+function saveCloudConfig(config) {
+  localStorage.setItem(WEBDAV_KEY, JSON.stringify(config));
+}
+
+function hasCloudCredentials(config) {
+  return Boolean(config.baseUrl && config.username && config.password && config.remoteFile);
+}
+
+function promptCloudConfig() {
+  const current = getCloudConfig();
+  const baseUrl = prompt("WebDAV地址", current.baseUrl);
+  if (!baseUrl) {
+    return null;
+  }
+
+  const username = prompt("WebDAV用户名", current.username);
+  if (!username) {
+    return null;
+  }
+
+  const password = prompt("WebDAV应用密码/登录密码", current.password);
+  if (!password) {
+    return null;
+  }
+
+  const remoteFile = prompt("云端文件路径", current.remoteFile) || current.remoteFile;
+  const autoBackupEnabled = confirm("是否启用自动定时备份到云？");
+  const autoBackupMinutes = autoBackupEnabled
+    ? Math.max(5, Number(prompt("自动备份间隔(分钟, >=5)", String(current.autoBackupMinutes)) || current.autoBackupMinutes))
+    : current.autoBackupMinutes;
+
+  const autoRestoreEnabled = confirm("是否启用自动定时从云恢复？(谨慎开启)");
+  const autoRestoreMinutes = autoRestoreEnabled
+    ? Math.max(5, Number(prompt("自动恢复间隔(分钟, >=5)", String(current.autoRestoreMinutes)) || current.autoRestoreMinutes))
+    : current.autoRestoreMinutes;
+
+  return {
+    baseUrl: baseUrl.trim(),
+    username: username.trim(),
+    password: password.trim(),
+    remoteFile: remoteFile.trim(),
+    autoBackupEnabled,
+    autoBackupMinutes,
+    autoRestoreEnabled,
+    autoRestoreMinutes
+  };
+}
+
+function buildCloudPayload(config) {
+  return {
+    baseUrl: config.baseUrl,
+    username: config.username,
+    password: config.password,
+    remoteFile: config.remoteFile
+  };
+}
+
+async function cloudBackup(silent = false) {
+  const config = getCloudConfig();
+  if (!hasCloudCredentials(config)) {
+    throw new Error("请先完成云配置");
+  }
+
+  if (cloudBusy) {
+    return;
+  }
+  cloudBusy = true;
+  try {
+    await api("/webdav/backup", {
+      method: "POST",
+      body: JSON.stringify(buildCloudPayload(config))
+    });
+    if (!silent) {
+      alert("已备份到云端");
+    }
+  } finally {
+    cloudBusy = false;
+  }
+}
+
+async function cloudRestore(silent = false) {
+  const config = getCloudConfig();
+  if (!hasCloudCredentials(config)) {
+    throw new Error("请先完成云配置");
+  }
+
+  if (cloudBusy) {
+    return;
+  }
+  cloudBusy = true;
+  try {
+    await api("/webdav/restore", {
+      method: "POST",
+      body: JSON.stringify(buildCloudPayload(config))
+    });
+    await loadData();
+    if (!silent) {
+      alert("已从云端恢复");
+    }
+  } finally {
+    cloudBusy = false;
+  }
+}
+
+function clearAutoJobs() {
+  if (autoBackupTimer) {
+    clearInterval(autoBackupTimer);
+    autoBackupTimer = null;
+  }
+  if (autoRestoreTimer) {
+    clearInterval(autoRestoreTimer);
+    autoRestoreTimer = null;
+  }
+}
+
+function setupAutoJobs() {
+  clearAutoJobs();
+  const config = getCloudConfig();
+  if (!hasCloudCredentials(config)) {
+    return;
+  }
+
+  if (config.autoBackupEnabled) {
+    autoBackupTimer = setInterval(() => {
+      cloudBackup(true).catch((err) => {
+        console.warn("自动云备份失败", err);
+      });
+    }, config.autoBackupMinutes * 60 * 1000);
+  }
+
+  if (config.autoRestoreEnabled) {
+    autoRestoreTimer = setInterval(() => {
+      cloudRestore(true).catch((err) => {
+        console.warn("自动云恢复失败", err);
+      });
+    }, config.autoRestoreMinutes * 60 * 1000);
+  }
+}
+
 function lockApp() {
   document.body.classList.add("auth-locked");
   authScreenEl.classList.remove("hidden");
@@ -75,6 +261,7 @@ async function startApp() {
   }
   initialized = true;
   await loadData();
+  setupAutoJobs();
 }
 
 async function verifyAndStart() {
@@ -324,6 +511,33 @@ restoreBtnEl.addEventListener("click", () => {
   restoreFileInputEl.value = "";
   restoreFileInputEl.click();
 });
+cloudConfigBtnEl.addEventListener("click", () => {
+  const config = promptCloudConfig();
+  if (!config) {
+    return;
+  }
+  saveCloudConfig(config);
+  setupAutoJobs();
+  alert("云配置已保存");
+});
+cloudBackupBtnEl.addEventListener("click", async () => {
+  try {
+    await cloudBackup(false);
+  } catch (err) {
+    alert(err.message || "云备份失败");
+  }
+});
+cloudRestoreBtnEl.addEventListener("click", async () => {
+  if (!confirm("从云端恢复会覆盖当前全部数据，确定继续吗？")) {
+    return;
+  }
+
+  try {
+    await cloudRestore(false);
+  } catch (err) {
+    alert(err.message || "云恢复失败");
+  }
+});
 restoreFileInputEl.addEventListener("change", async () => {
   const file = restoreFileInputEl.files?.[0];
   if (!file) {
@@ -367,6 +581,7 @@ authFormEl.addEventListener("submit", async (ev) => {
 
 logoutBtnEl.addEventListener("click", () => {
   clearAuthenticated();
+  clearAutoJobs();
   lockApp();
 });
 

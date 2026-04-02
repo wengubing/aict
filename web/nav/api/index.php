@@ -305,6 +305,93 @@ function normalize_data(array $raw): array
     return $result;
 }
 
+function normalize_webdav_config(array $body): array
+{
+    $baseUrl = rtrim(trim((string) ($body['baseUrl'] ?? '')), '/');
+    $username = trim((string) ($body['username'] ?? ''));
+    $password = trim((string) ($body['password'] ?? ''));
+    $remoteFile = ltrim(trim((string) ($body['remoteFile'] ?? '')), '/');
+
+    if ($baseUrl === '' || $username === '' || $password === '' || $remoteFile === '') {
+        throw new InvalidArgumentException('WebDAV 配置不完整');
+    }
+
+    if (preg_match('/^https?:\/\//i', $baseUrl) !== 1) {
+        throw new InvalidArgumentException('WebDAV 地址必须是 http/https');
+    }
+
+    return [
+        'baseUrl' => $baseUrl,
+        'username' => $username,
+        'password' => $password,
+        'remoteFile' => $remoteFile,
+    ];
+}
+
+function webdav_request(string $method, string $url, string $username, string $password, ?string $body = null): array
+{
+    $ch = curl_init($url);
+    if ($ch === false) {
+        throw new RuntimeException('初始化 WebDAV 连接失败');
+    }
+
+    $headers = [];
+    if ($body !== null) {
+        $headers[] = 'Content-Type: application/json; charset=utf-8';
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+    }
+
+    curl_setopt_array($ch, [
+        CURLOPT_CUSTOMREQUEST => $method,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_USERPWD => $username . ':' . $password,
+        CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+        CURLOPT_HTTPHEADER => $headers,
+    ]);
+
+    $responseBody = curl_exec($ch);
+    $err = curl_error($ch);
+    $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($responseBody === false) {
+        throw new RuntimeException('WebDAV 请求失败: ' . $err);
+    }
+
+    return ['status' => $status, 'body' => (string) $responseBody];
+}
+
+function build_webdav_url(string $baseUrl, string $remotePath): string
+{
+    return $baseUrl . '/' . str_replace('%2F', '/', rawurlencode($remotePath));
+}
+
+function ensure_webdav_dirs(string $baseUrl, string $username, string $password, string $remoteFile): void
+{
+    $parts = explode('/', $remoteFile);
+    array_pop($parts);
+    if ($parts === []) {
+        return;
+    }
+
+    $current = '';
+    foreach ($parts as $segment) {
+        $segment = trim($segment);
+        if ($segment === '') {
+            continue;
+        }
+
+        $current = $current === '' ? $segment : ($current . '/' . $segment);
+        $url = build_webdav_url($baseUrl, $current);
+        $res = webdav_request('MKCOL', $url, $username, $password, null);
+        if (!in_array($res['status'], [201, 405, 301], true)) {
+            throw new RuntimeException('创建云目录失败，HTTP ' . $res['status']);
+        }
+    }
+}
+
 try {
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     $path = parse_path();
@@ -325,6 +412,50 @@ try {
     if ($method === 'POST' && $path === '/restore') {
         $body = read_json_body();
         $normalized = normalize_data($body);
+        write_data($normalized);
+        send_json(200, ['ok' => true, 'drawers' => count($normalized['drawers'])]);
+    }
+
+    if ($method === 'POST' && $path === '/webdav/backup') {
+        if (!function_exists('curl_init')) {
+            throw new RuntimeException('PHP 未启用 cURL 扩展，无法使用 WebDAV');
+        }
+
+        $cfg = normalize_webdav_config(read_json_body());
+        ensure_webdav_dirs($cfg['baseUrl'], $cfg['username'], $cfg['password'], $cfg['remoteFile']);
+
+        $json = json_encode(read_data(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        if ($json === false) {
+            throw new RuntimeException('本地数据编码失败');
+        }
+
+        $url = build_webdav_url($cfg['baseUrl'], $cfg['remoteFile']);
+        $res = webdav_request('PUT', $url, $cfg['username'], $cfg['password'], $json);
+        if (!in_array($res['status'], [200, 201, 204], true)) {
+            throw new RuntimeException('云备份失败，HTTP ' . $res['status']);
+        }
+
+        send_json(200, ['ok' => true]);
+    }
+
+    if ($method === 'POST' && $path === '/webdav/restore') {
+        if (!function_exists('curl_init')) {
+            throw new RuntimeException('PHP 未启用 cURL 扩展，无法使用 WebDAV');
+        }
+
+        $cfg = normalize_webdav_config(read_json_body());
+        $url = build_webdav_url($cfg['baseUrl'], $cfg['remoteFile']);
+        $res = webdav_request('GET', $url, $cfg['username'], $cfg['password'], null);
+        if ($res['status'] !== 200) {
+            throw new RuntimeException('云恢复失败，HTTP ' . $res['status']);
+        }
+
+        $decoded = json_decode($res['body'], true);
+        if (!is_array($decoded)) {
+            throw new RuntimeException('云端备份文件不是有效 JSON');
+        }
+
+        $normalized = normalize_data($decoded);
         write_data($normalized);
         send_json(200, ['ok' => true, 'drawers' => count($normalized['drawers'])]);
     }

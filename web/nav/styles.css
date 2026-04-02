@@ -124,6 +124,7 @@ body.auth-locked .app {
 .top-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .icon-btn,
