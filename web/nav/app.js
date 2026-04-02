@@ -13,7 +13,17 @@ const addSiteEl = document.querySelector("#addSite");
 const drawerPanelEl = document.querySelector("#drawerPanel");
 const drawerMaskEl = document.querySelector("#drawerMask");
 const mobileToggleEl = document.querySelector("#mobileToggle");
+const authScreenEl = document.querySelector("#authScreen");
+const authFormEl = document.querySelector("#authForm");
+const authInputEl = document.querySelector("#authInput");
+const authErrorEl = document.querySelector("#authError");
+const logoutBtnEl = document.querySelector("#logoutBtn");
 const API_BASE = "./api/index.php";
+const PASSCODE = document.body.dataset.passcode || "";
+const AUTH_KEY = "nav_auth_until";
+const AUTH_TTL_MS = 24 * 60 * 60 * 1000;
+
+let initialized = false;
 
 async function api(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -25,6 +35,60 @@ async function api(path, options = {}) {
     throw new Error(err.error || "请求失败");
   }
   return res.json();
+}
+
+function isAuthenticated() {
+  const raw = localStorage.getItem(AUTH_KEY);
+  if (!raw) {
+    return false;
+  }
+  const expiresAt = Number(raw);
+  return Number.isFinite(expiresAt) && expiresAt > Date.now();
+}
+
+function setAuthenticated() {
+  localStorage.setItem(AUTH_KEY, String(Date.now() + AUTH_TTL_MS));
+}
+
+function clearAuthenticated() {
+  localStorage.removeItem(AUTH_KEY);
+}
+
+function lockApp() {
+  document.body.classList.add("auth-locked");
+  authScreenEl.classList.remove("hidden");
+  authInputEl.value = "";
+  authErrorEl.textContent = "";
+}
+
+function unlockApp() {
+  document.body.classList.remove("auth-locked");
+  authScreenEl.classList.add("hidden");
+}
+
+async function startApp() {
+  if (initialized) {
+    return;
+  }
+  initialized = true;
+  await loadData();
+}
+
+async function verifyAndStart() {
+  if (PASSCODE === "") {
+    authErrorEl.textContent = "未配置口令，请在 HTML 的 data-passcode 中设置。";
+    lockApp();
+    return;
+  }
+
+  if (isAuthenticated()) {
+    unlockApp();
+    await startApp();
+    return;
+  }
+
+  lockApp();
+  authInputEl.focus();
 }
 
 function getActiveDrawer() {
@@ -232,7 +296,31 @@ mobileToggleEl.addEventListener("click", () => {
   drawerMaskEl.classList.add("show");
 });
 drawerMaskEl.addEventListener("click", closeDrawerOnMobile);
+authFormEl.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  if (authInputEl.value !== PASSCODE) {
+    authErrorEl.textContent = "口令错误，请重试。";
+    authInputEl.focus();
+    authInputEl.select();
+    return;
+  }
 
-loadData().catch((err) => {
+  setAuthenticated();
+  unlockApp();
+  try {
+    await startApp();
+  } catch (err) {
+    alert(err.message || "加载失败");
+    lockApp();
+  }
+});
+
+logoutBtnEl.addEventListener("click", () => {
+  clearAuthenticated();
+  lockApp();
+});
+
+verifyAndStart().catch((err) => {
   alert(err.message || "加载失败");
+  lockApp();
 });

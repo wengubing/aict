@@ -6,7 +6,19 @@
 		<title>导航主页</title>
 		<link rel="stylesheet" href="./styles.css">
 	</head>
-	<body>
+	<body data-passcode="123456">
+		<section class="auth-screen" id="authScreen">
+			<div class="auth-card">
+				<h2>进入导航主页</h2>
+				<p>请输入访问口令，验证后 24 小时内自动保持登录。</p>
+				<form id="authForm" class="auth-form">
+					<input id="authInput" type="password" placeholder="输入口令" autocomplete="current-password" required>
+					<button type="submit" class="primary-btn">进入主页</button>
+				</form>
+				<p class="auth-error" id="authError"></p>
+			</div>
+		</section>
+
 		<div class="drawer-mask" id="drawerMask"></div>
 		<main class="app">
 			<aside class="drawer-panel" id="drawerPanel">
@@ -26,6 +38,7 @@
 						<h2 id="drawerTitle">加载中...</h2>
 					</div>
 					<div class="top-actions">
+						<button class="ghost-btn" id="logoutBtn">退出登录</button>
 						<button class="ghost-btn" id="editToggle">编辑模式</button>
 						<button class="primary-btn" id="addSite">新增网址</button>
 					</div>
