@@ -1,7 +1,66 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # 开启未定义变量检查，减少拼写错误导致的隐性问题。
 set -u
+
+# 交互式菜单选择器：上下方向键移动，回车确认。
+select_option() {
+	menu_title="$1"
+	shift
+	options=("$@")
+	selected=0
+	option_count="${#options[@]}"
+
+	while :; do
+		printf '\n%s\n' "$menu_title"
+		i=0
+		while [ "$i" -lt "$option_count" ]; do
+			if [ "$i" -eq "$selected" ]; then
+				printf ' > %s\n' "${options[$i]}"
+			else
+				printf '   %s\n' "${options[$i]}"
+			fi
+			i=$((i + 1))
+		done
+
+		if ! IFS= read -rsn1 key; then
+			SELECTED_INDEX=-1
+			return 1
+		fi
+		if [ "$key" = $'\033' ]; then
+			IFS= read -rsn2 key_tail
+			key="$key$key_tail"
+		fi
+
+		case "$key" in
+			$'\033[A')
+				selected=$((selected - 1))
+				if [ "$selected" -lt 0 ]; then
+					selected=$((option_count - 1))
+				fi
+				;;
+			$'\033[B')
+				selected=$((selected + 1))
+				if [ "$selected" -ge "$option_count" ]; then
+					selected=0
+				fi
+				;;
+			'' | $'\n')
+				SELECTED_INDEX="$selected"
+				return 0
+				;;
+			*)
+				;;
+		esac
+
+		# 回到菜单起始位置并清除旧内容后重绘。
+		lines_to_clear=$((option_count + 1))
+		while [ "$lines_to_clear" -gt 0 ]; do
+			printf '\033[1A\033[2K\r'
+			lines_to_clear=$((lines_to_clear - 1))
+		done
+	done
+}
 
 print_banner() {
 	printf '%s\n' "========================================"
@@ -72,43 +131,45 @@ run_shell_command() {
 	else
 		printf '命令执行失败。\n'
 	fi
+
+	printf '按回车继续...'
+	IFS= read -r _
 }
 
 openclaw_menu() {
 	# 使用无限循环 + return 作为子菜单返回机制。
 	while :; do
-		printf '\nopenclaw 菜单:\n'
-		printf '1. 配置引导：openclaw onboard\n'
-		printf '2. web面板：openclaw dashboard\n'
-		printf '3. 启动gateway：openclaw gateway start\n'
-		printf '4. 重启gateway：openclaw gateway restart\n'
-		printf '5. 停止gateway：openclaw gateway stop\n'
-		printf '6. 返回\n'
-		printf '请输入数字并回车: '
-		read -r openclaw_choice
+		select_option 'openclaw 菜单（上下键选择，回车确认）' \
+			'配置引导：openclaw onboard' \
+			'web面板：openclaw dashboard' \
+			'启动gateway：openclaw gateway start' \
+			'重启gateway：openclaw gateway restart' \
+			'停止gateway：openclaw gateway stop' \
+			'返回' || return
+		openclaw_choice="$SELECTED_INDEX"
 
 		# case 根据数字分发到对应命令。
 		case "$openclaw_choice" in
-			1)
+			0)
 				run_shell_command "openclaw onboard"
 				;;
-			2)
+			1)
 				run_shell_command "openclaw dashboard"
 				;;
-			3)
+			2)
 				run_shell_command "openclaw gateway start"
 				;;
-			4)
+			3)
 				run_shell_command "openclaw gateway restart"
 				;;
-			5)
+			4)
 				run_shell_command "openclaw gateway stop"
 				;;
-			6)
+			5)
 				return
 				;;
 			*)
-				printf '无效输入，请输入 1 到 6。\n'
+				printf '无效输入，请重试。\n'
 				;;
 		esac
 	done
@@ -117,37 +178,27 @@ openclaw_menu() {
 quick_command_menu() {
 	# 一级快捷指令菜单，支持继续进入 openclaw 二级菜单。
 	while :; do
-		printf '\n快捷指令列表:\n'
-		printf '1. openclaw\n'
-		printf '2. hph\n'
-		printf '3. 返回\n'
-		printf '请输入数字并回车: '
-		read -r quick_choice
+		select_option '快捷指令列表（上下键选择，回车确认）' \
+			'openclaw' \
+			'hph' \
+			'返回' || return
+		quick_choice="$SELECTED_INDEX"
 
 		case "$quick_choice" in
-			1)
+			0)
 				openclaw_menu
 				;;
-			2)
+			1)
 				run_shell_command "hph"
 				;;
-			3)
+			2)
 				return
 				;;
 			*)
-				printf '无效输入，请输入 1、2 或 3。\n'
+				printf '无效输入，请重试。\n'
 				;;
 		esac
 	done
-}
-
-show_menu() {
-	printf '\n快捷指令菜单:\n'
-	printf '1. 显示当前系统信息\n'
-	printf '2. 从服务器 http://localhost:80/test.txt 下载到本地\n'
-	printf '3. 快捷指令列表\n'
-	printf '4. 退出\n'
-	printf '请输入数字并回车: '
 }
 
 main() {
@@ -156,25 +207,33 @@ main() {
 
 	# 主循环持续显示菜单，直到显式选择退出。
 	while :; do
-		show_menu
-		read -r choice
+		select_option '快捷指令菜单（上下键选择，回车确认）' \
+			'显示当前系统信息' \
+			'从服务器 http://localhost:80/test.txt 下载到本地' \
+			'快捷指令列表' \
+			'退出' || exit 0
+		choice="$SELECTED_INDEX"
 
 		case "$choice" in
-			1)
+			0)
 				show_system_info
+				printf '按回车继续...'
+				IFS= read -r _
+				;;
+			1)
+				download_test_file
+				printf '按回车继续...'
+				IFS= read -r _
 				;;
 			2)
-				download_test_file
-				;;
-			3)
 				quick_command_menu
 				;;
-			4)
+			3)
 				printf '已退出。\n'
 				exit 0
 				;;
 			*)
-				printf '无效输入，请输入 1、2、3 或 4。\n'
+				printf '无效输入，请重试。\n'
 				;;
 		esac
 	done
