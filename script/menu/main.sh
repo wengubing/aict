@@ -58,11 +58,87 @@ download_test_file() {
 	fi
 }
 
+run_shell_command() {
+	command_text="$1"
+
+	printf '\n执行命令: %s\n' "$command_text"
+	if sh -c "$command_text"; then
+		printf '命令执行完成。\n'
+	else
+		printf '命令执行失败。\n'
+	fi
+}
+
+openclaw_menu() {
+	while :; do
+		printf '\nopenclaw 菜单:\n'
+		printf '1. 配置引导：openclaw onboard\n'
+		printf '2. web面板：openclaw dashboard\n'
+		printf '3. 启动gateway：openclaw gateway start\n'
+		printf '4. 重启gateway：openclaw gateway restart\n'
+		printf '5. 停止gateway：openclaw gateway stop\n'
+		printf '6. 返回\n'
+		printf '请输入数字并回车: '
+		read -r openclaw_choice
+
+		case "$openclaw_choice" in
+			1)
+				run_shell_command "openclaw onboard"
+				;;
+			2)
+				run_shell_command "openclaw dashboard"
+				;;
+			3)
+				run_shell_command "openclaw gateway start"
+				;;
+			4)
+				run_shell_command "openclaw gateway restart"
+				;;
+			5)
+				run_shell_command "openclaw gateway stop"
+				;;
+			6)
+				return
+				;;
+			*)
+				printf '无效输入，请输入 1 到 6。\n'
+				;;
+		esac
+	done
+}
+
+quick_command_menu() {
+	while :; do
+		printf '\n快捷指令列表:\n'
+		printf '1. openclaw\n'
+		printf '2. hph\n'
+		printf '3. 返回\n'
+		printf '请输入数字并回车: '
+		read -r quick_choice
+
+		case "$quick_choice" in
+			1)
+				openclaw_menu
+				;;
+			2)
+				run_shell_command "hph"
+				;;
+			3)
+				return
+				;;
+			*)
+				printf '无效输入，请输入 1、2 或 3。\n'
+				;;
+		esac
+	done
+}
+
 show_menu() {
 	printf '\n快捷指令菜单:\n'
 	printf '1. 显示当前系统信息\n'
 	printf '2. 从服务器 http://localhost:80/test.txt 下载到本地\n'
-	printf '3. 退出\n'
+	printf '3. 快捷指令列表\n'
+	printf '4. 退出\n'
 	printf '请输入数字并回车: '
 }
 
@@ -82,11 +158,14 @@ main() {
 				download_test_file
 				;;
 			3)
+				quick_command_menu
+				;;
+			4)
 				printf '已退出。\n'
 				exit 0
 				;;
 			*)
-				printf '无效输入，请输入 1、2 或 3。\n'
+				printf '无效输入，请输入 1、2、3 或 4。\n'
 				;;
 		esac
 	done
