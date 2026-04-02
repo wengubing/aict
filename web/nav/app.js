@@ -215,7 +215,7 @@ async function loadCloudConfig() {
 
 async function persistCloudConfig(config) {
   const saved = await api("/config", {
-    method: "PUT",
+    method: "POST",
     body: JSON.stringify({ webdav: config })
   });
   cloudConfig = saved?.webdav ? saved.webdav : config;

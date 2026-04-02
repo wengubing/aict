@@ -466,7 +466,7 @@ try {
         send_json(200, $data['config']);
     }
 
-    if ($method === 'PUT' && $path === '/config') {
+    if (($method === 'PUT' || $method === 'POST') && $path === '/config') {
         $data = read_data();
         $body = read_json_body();
         $webdavInput = isset($body['webdav']) && is_array($body['webdav']) ? $body['webdav'] : [];
