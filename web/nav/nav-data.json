@@ -1,48 +1,48 @@
 {
-  "drawers": [
-    {
-      "id": "drawer_default",
-      "name": "工作",
-      "color": "#0b5d76",
-      "sites": [
+    "drawers": [
         {
-          "id": "site_github",
-          "url": "https://github.com",
-          "title": "GitHub",
-          "icon": "https://github.githubassets.com/favicons/favicon.svg"
+            "id": "drawer_default",
+            "name": "工作",
+            "color": "#0b5d76",
+            "sites": [
+                {
+                    "id": "site_github",
+                    "url": "https://github.com",
+                    "title": "GitHub",
+                    "icon": "https://github.githubassets.com/favicons/favicon.svg"
+                },
+                {
+                    "id": "site_stackoverflow",
+                    "url": "https://stackoverflow.com",
+                    "title": "Stack Overflow",
+                    "icon": "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico"
+                },
+                {
+                    "id": "site_mnfukrra_vtzk4q",
+                    "url": "https://baidu.com/",
+                    "title": "baidu.com",
+                    "icon": "https://www.google.com/s2/favicons?domain=baidu.com&sz=128"
+                }
+            ]
         },
         {
-          "id": "site_stackoverflow",
-          "url": "https://stackoverflow.com",
-          "title": "Stack Overflow",
-          "icon": "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico"
-        },
-        {
-          "id": "site_mnfukrra_vtzk4q",
-          "url": "https://baidu.com/",
-          "title": "baidu.com",
-          "icon": "https://www.google.com/s2/favicons?domain=baidu.com&sz=128"
+            "id": "drawer_mnfulyzi_kipscm",
+            "name": "BT面板",
+            "color": "#156f52",
+            "sites": [
+                {
+                    "id": "site_mnfums3n_ub991s",
+                    "url": "http://cd44.forijk.cn:985/admin",
+                    "title": "备案",
+                    "icon": "https://cloudcache.tencent-cloud.com/qcloud/app/resource/ac/favicon.ico"
+                },
+                {
+                    "id": "site_mnfuqpq6_hsgntr",
+                    "url": "http://sg24.forijk.cn:985/admin",
+                    "title": "sg24.forijk.cn",
+                    "icon": "https://www.google.com/s2/favicons?domain=sg24.forijk.cn&sz=128"
+                }
+            ]
         }
-      ]
-    },
-    {
-      "id": "drawer_mnfulyzi_kipscm",
-      "name": "BT面板",
-      "color": "#156f52",
-      "sites": [
-        {
-          "id": "site_mnfums3n_ub991s",
-          "url": "http://cd44.forijk.cn:985/admin",
-          "title": "备案",
-          "icon": "https://cloudcache.tencent-cloud.com/qcloud/app/resource/ac/favicon.ico"
-        },
-        {
-          "id": "site_mnfuqpq6_hsgntr",
-          "url": "http://sg24.forijk.cn:985/admin",
-          "title": "sg24.forijk.cn",
-          "icon": "https://www.google.com/s2/favicons?domain=sg24.forijk.cn&sz=128"
-        }
-      ]
-    }
-  ]
+    ]
 }

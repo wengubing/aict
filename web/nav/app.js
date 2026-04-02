@@ -13,9 +13,10 @@ const addSiteEl = document.querySelector("#addSite");
 const drawerPanelEl = document.querySelector("#drawerPanel");
 const drawerMaskEl = document.querySelector("#drawerMask");
 const mobileToggleEl = document.querySelector("#mobileToggle");
+const API_BASE = "./api/index.php";
 
 async function api(path, options = {}) {
-  const res = await fetch(path, {
+  const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
     ...options
   });
@@ -108,7 +109,7 @@ function renderSites() {
       if (!nextUrl) {
         return;
       }
-      await api(`/api/drawers/${drawer.id}/sites/${site.id}`, {
+      await api(`/drawers/${drawer.id}/sites/${site.id}`, {
         method: "PUT",
         body: JSON.stringify({ url: nextUrl })
       });
@@ -120,7 +121,7 @@ function renderSites() {
       if (!confirm("确认删除该网址吗？")) {
         return;
       }
-      await api(`/api/drawers/${drawer.id}/sites/${site.id}`, { method: "DELETE" });
+      await api(`/drawers/${drawer.id}/sites/${site.id}`, { method: "DELETE" });
       await loadData();
     });
 
@@ -147,7 +148,7 @@ async function addDrawer() {
     return;
   }
   const color = prompt("背景颜色 (HEX, 例如 #156f52)", "#156f52") || "#156f52";
-  const created = await api("/api/drawers", {
+  const created = await api("/drawers", {
     method: "POST",
     body: JSON.stringify({ name, color })
   });
@@ -161,13 +162,13 @@ async function editDrawer(drawer) {
     return;
   }
   const color = prompt("背景颜色 (HEX)", drawer.color) || drawer.color;
-  await api(`/api/drawers/${drawer.id}`, {
+  await api(`/drawers/${drawer.id}`, {
     method: "PUT",
     body: JSON.stringify({ name, color })
   });
 
   if (state.editMode && confirm("是否删除该抽屉？")) {
-    await api(`/api/drawers/${drawer.id}`, { method: "DELETE" });
+    await api(`/drawers/${drawer.id}`, { method: "DELETE" });
     if (state.activeDrawerId === drawer.id) {
       state.activeDrawerId = state.data.drawers[0]?.id || null;
     }
@@ -186,7 +187,7 @@ async function addSite() {
   if (!url || url === "https://") {
     return;
   }
-  await api(`/api/drawers/${drawer.id}/sites`, {
+  await api(`/drawers/${drawer.id}/sites`, {
     method: "POST",
     body: JSON.stringify({ url })
   });
@@ -194,7 +195,7 @@ async function addSite() {
 }
 
 async function loadData() {
-  state.data = await api("/api/nav");
+  state.data = await api("/nav");
   if (!state.activeDrawerId && state.data.drawers.length) {
     state.activeDrawerId = state.data.drawers[0].id;
   }

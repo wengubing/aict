@@ -1,16 +1,26 @@
 # 网址导航主页
 
-## 启动方式
+## 运行方式（Nginx + PHP）
+
+将整个 `web/nav` 目录复制到支持 PHP 的站点目录即可。
+
+前端请求路径已固定为：
+
+- `./api/index.php/*`
+
+只要 PHP 可执行，页面就能直接工作。
+
+## 本地快速调试（可选）
 
 在当前目录执行：
 
 ```bash
-node server.js
+php -S 127.0.0.1:8787
 ```
 
-默认访问地址：
+然后访问：
 
-- http://localhost:8787
+- http://127.0.0.1:8787
 
 ## 功能
 
@@ -19,15 +29,19 @@ node server.js
 - 前端可新增/编辑/删除抽屉和网址
 - 点击条目右上角 `✎` 可编辑抽屉信息或网址
 - 网址在新增/编辑时自动抓取标题和图标(失败时回退域名和通用 favicon)
-- 抽屉与网址数据持久化到 `nav-data.json`
+- 抽屉与网址数据持久化到 `nav-data.json`（PHP 读写）
 
-## 后端接口
+## 后端接口（PHP）
 
-- `GET /api/nav`
-- `POST /api/drawers`
-- `PUT /api/drawers/:drawerId`
-- `DELETE /api/drawers/:drawerId`
-- `POST /api/drawers/:drawerId/sites`
-- `PUT /api/drawers/:drawerId/sites/:siteId`
-- `DELETE /api/drawers/:drawerId/sites/:siteId`
-- `POST /api/preview`
+- `GET ./api/index.php/nav`
+- `POST ./api/index.php/drawers`
+- `PUT ./api/index.php/drawers/:drawerId`
+- `DELETE ./api/index.php/drawers/:drawerId`
+- `POST ./api/index.php/drawers/:drawerId/sites`
+- `PUT ./api/index.php/drawers/:drawerId/sites/:siteId`
+- `DELETE ./api/index.php/drawers/:drawerId/sites/:siteId`
+- `POST ./api/index.php/preview`
+
+## Nginx 权限提示
+
+请确保 `nav-data.json` 对 PHP 进程用户可写，否则新增/编辑/删除会失败。
